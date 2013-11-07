@@ -25,13 +25,13 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         $vq = lvar('q');
 
         // test-u1
-        $expected = [pair(lvar('x'), lvar('y'))];
+        $expected = [pair('x', lvar('y'))];
         $this->assertEquals($expected, unify($vx, $vy, empty_subst()));
 
         // test-u2
         $expected = [
-            pair(lvar('y'), 1),
-            pair(lvar('x'), lvar('y')),
+            pair('y', 1),
+            pair('x', lvar('y')),
         ];
         $this->assertEquals($expected, unify($vx, 1, unify($vx, $vy, empty_subst())));
 
@@ -44,10 +44,10 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 
         // test-u4
         $expected = [
-            pair(lvar('y'), 1),
-            pair(lvar('x'), lvar('y')),
+            pair('y', 1),
+            pair('x', lvar('y')),
         ];
-        $this->assertEquals($expected, unify(pair($vx, $vy), pair($vy, 1), empty_subst()));
+        $this->assertEquals($expected, unify([$vx, $vy], [$vy, 1], empty_subst()));
         // exactly the same substitution as in test-u2
     }
 
@@ -62,10 +62,11 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         // empty list of outcomes: 10 is not a member of '(1 2 3)
 
         // test choice 3
+        $vx = lvar('x');
         $expected = [
-            [pair(lvar('x'), 1)],
-            [pair(lvar('x'), 2)],
-            [pair(lvar('x'), 3)],
+            [pair('x', 1)],
+            [pair('x', 2)],
+            [pair('x', 3)],
         ];
         $this->assertEquals($expected, run(choice($vx, [1, 2, 3])));
         // three outcomes

@@ -247,7 +247,7 @@ function unify($t1, $t2, $s) {
 
     if (is_array($t1) && is_array($t2)) {
         $s = unify(first($t1), first($t2), $s);
-        return $s ? unify(rest($t1), rest($t2), $s) : false;
+        return $s !== false ? unify(rest($t1), rest($t2), $s) : false;
     }
 
     if ($t1 === $t2) {
@@ -277,7 +277,7 @@ function unify($t1, $t2, $s) {
 function eq($t1, $t2) {
     return function ($s) use ($t1, $t2) {
         $res = unify($t1, $t2, $s);
-        if ($res) {
+        if ($res !== false) {
             return succeed($res);
         }
 
