@@ -30,19 +30,42 @@ namespace igorw\reasoned;
 // one of them yields no result whatsoever for any argument; the other
 // merely returns its argument as the sole result.
 
-(define (fail x) '())
-(define (succeed x) (list x))
+function fail($x) {
+    return [];
+}
+
+function succeed($x) {
+    return [$x];
+}
+
+const fail = 'igorw\reasoned\fail';
+const succeed = 'igorw\reasoned\succeed';
 
 // We build more complex non-deterministic functions by combining
 // the existing ones with the help of the following two combinators.
 
+function append($l1, $l2) {
+    return array_merge($l1, $l2);
+}
+
+function apply($fn, $args) {
+    return call_user_func_array($fn, $args);
+}
+
+function call(/* $fn, $args... */) {
+    $args = func_get_args();
+    $fn = array_shift($args);
+    return call_user_func_array($fn, $args);
+}
 
 // (disj f1 f2) returns all the results of f1 and all the results of f2.
 // (disj f1 f2) returns no results only if neither f1 nor f2 returned
 // any. In that sense, it is analogous to the logical disjunction.
-(define (disj f1 f2)
-  (lambda (x)
-    (append (f1 x) (f2 x))))
+function disj($f1, $f2) {
+    return function ($x) use ($f1, $f2) {
+        return append($f1($x), $f2($x));
+    };
+}
 
 // (conj f1 f2) looks like a `functional composition' of f2 and f1.
 // Only (f1 x) may return several results, so we have to apply f2 to
@@ -50,27 +73,37 @@ namespace igorw\reasoned;
 // Obviously (conj fail f) and (conj f fail) are both equivalent to fail:
 // they return no results, ever. It that sense, conj is analogous to the
 // logical conjunction.
-(define (conj f1 f2)
-  (lambda (x)
-    (apply append (map f2 (f1 x)))))
+function conj($f1, $f2) {
+    return function ($x) use ($f1, $f2) {
+        return apply(__NAMESPACE__.'\append', array_map($f2, $f1($x)));
+    };
+}
 
 
 // Examples
-(define (cout . args)
-  (for-each display args))
-(define nl #\newline)
+function cout(/* $args... */) {
+    $args = func_get_args();
+    foreach ($args as $arg) {
+        if (is_string($arg)) {
+            echo $arg;
+        } else {
+            echo json_encode($arg);
+        }
+    }
+}
 
-(cout "test1" nl
-  ((disj
-     (disj fail succeed)
-     (conj
-       (disj (lambda (x) (succeed (+ x 1)))
-         (lambda (x) (succeed (+ x 10))))
-       (disj succeed succeed)))
-    100)
-  nl)
+const nl = "\n";
+
+cout("test1", nl,
+  call(disj(
+     disj(fail, succeed),
+     conj(
+       disj(function ($x) { return succeed($x + 1); },
+         function ($x) { return succeed($x + 10); }),
+       disj(succeed, succeed))),
+    100),
+  nl);
 // => (100 101 101 110 110)
-
 
 
 // Point 2: (Prolog-like) Logic variables
@@ -92,8 +125,22 @@ namespace igorw\reasoned;
 // uncertainty is reduced.
 
 // We chose to represent logic variables as vectors:
-(define (var name) (vector name))
-(define var? vector?)
+
+class LVar {
+    public $name;
+
+    function __construct($name) {
+        $this->name = $name;
+    }
+}
+
+function lvar($name) {
+    return new LVar($name);
+}
+
+function is_lvar($x) {
+    return is_object($x) && $x instanceof LVar;
+}
 
 // We implement associations of logic variables and their values
 // (aka, _substitutions_) as associative lists of (variable . value)
@@ -101,17 +148,71 @@ namespace igorw\reasoned;
 // One may say that a substitution represents our current knowledge
 // of the world.
 
-(define empty-subst '())
-(define (ext-s var value s) (cons (cons var value) s))
+class Pair {
+    public $first;
+    public $second;
+
+    function __construct($first, $second) {
+        $this->first = $first;
+        $this->second = $second;
+    }
+
+    function as_array() {
+        return [$this->first, $this->second];
+    }
+}
+
+function pair($first, $second) {
+    return new Pair($first, $second);
+}
+
+function cons($x, $l) {
+    array_unshift($l, $x);
+    return $l;
+}
+
+function first($l) {
+    return array_shift($l);
+}
+
+function rest($l) {
+    array_shift($l);
+    return $l;
+}
+
+$empty_subst = [];
+
+function ext_s($var, $value, $s) {
+    return cons(pair($var->name, $value), $s);
+}
 
 // Find the value associated with var in substitution s.
 // Return var itself if it is unbound.
 // In miniKanren, this function is called 'walk'
-(define (lookup var s)
-  (cond
-    ((not (var? var)) var)
-    ((assq var s) => (lambda (b) (lookup (cdr b) s)))
-    (else var)))
+
+function assq($x, $l) {
+    foreach ($l as $pair) {
+        list($key, $value) = $pair->as_array();
+        if ($x == $key) {
+            return $pair;
+        }
+    }
+
+    return false;
+}
+
+function lookup($var, $s) {
+    if (!is_lvar($var)) {
+        return $var;
+    }
+
+    $pair = assq($var->name, $s);
+    if ($pair) {
+        return lookup($pair->second, $s);
+    }
+
+    return $var;
+}
 
 // There are actually two ways of implementing substitutions as
 // associative list.
@@ -151,52 +252,69 @@ namespace igorw\reasoned;
 
 
 // return the new substitution, or #f on contradiction.
-(define (unify t1 t2 s)
-  (let ((t1 (lookup t1 s)) ; find out what t1 actually is given our knowledge s
-    (t2 (lookup t2 s))); find out what t2 actually is given our knowledge s
-    (cond
-      ((eq? t1 t2) s)       ; t1 and t2 are the same; no new knowledge
-      ((var? t1)        ; t1 is an unbound variable
-    (ext-s t1 t2 s))
-      ((var? t2)        ; t2 is an unbound variable
-    (ext-s t2 t1 s))
-      ((and (pair? t1) (pair? t2)) ; if t1 is a pair, so must be t2
-    (let ((s (unify (car t1) (car t2) s)))
-      (and s (unify (cdr t1) (cdr t2) s))))
-      ((equal? t1 t2) s)    ; t1 and t2 are really the same values
-      (else #f))))
+
+function is_pair($x) {
+    return $x instanceof Pair;
+}
+
+function unify($t1, $t2, $s) {
+    $t1 = lookup($t1, $s);
+    $t2 = lookup($t2, $s);
+
+    if (is_object($t1) === is_object($t2) && $t1 === $t2) {
+        return $s;
+    }
+
+    if (is_lvar($t1)) {
+        return ext_s($t1, $t2, $s);
+    }
+
+    if (is_lvar($t2)) {
+        return ext_s($t2, $t1, $s);
+    }
+
+    if (is_pair($t1) && is_pair($t2)) {
+        $s = unify($t1->first, $t2->first, $s);
+        return $s ? unify($t1->second, $t2->second, $s) : false;
+    }
+
+    if ($t1 === $t2) {
+        return $s;
+    }
+
+    return false;
+}
 
 
 // define a bunch of logic variables, for convenience
-(define vx (var 'x))
-(define vy (var 'y))
-(define vz (var 'z))
-(define vq (var 'q))
+$vx = lvar('x');
+$vy = lvar('y');
+$vz = lvar('z');
+$vq = lvar('q');
 
-(cout "test-u1" nl
-  (unify vx vy empty-subst)
-  nl)
+cout("test-u1", nl,
+  unify($vx, $vy, $empty_subst),
+  nl);
 // => ((#(x) . #(y)))
 
-(cout "test-u2" nl
-  (unify vx 1 (unify vx vy empty-subst))
-  nl)
+cout("test-u2", nl,
+  unify($vx, 1, unify($vx, $vy, $empty_subst)),
+  nl);
 // => ((#(y) . 1) (#(x) . #(y)))
 
-(cout "test-u3" nl
-  (lookup vy (unify vx 1 (unify vx vy empty-subst)))
-  nl)
+cout("test-u3", nl,
+  lookup($vy, unify($vx, 1, unify($vx, $vy, $empty_subst))),
+  nl);
 // => 1
 // when two variables are associated with each other,
 // improving our knowledge about one of them improves the knowledge of the
 // other
 
-(cout "test-u4" nl
-  (unify (cons vx vy) (cons vy 1) empty-subst)
-  nl)
+cout("test-u4", nl,
+  unify(pair($vx, $vy), pair($vy, 1), $empty_subst),
+  nl);
 // => ((#(y) . 1) (#(x) . #(y)))
 // exactly the same substitution as in test-u2
-
 
 
 // Part 3: Logic system
@@ -215,16 +333,24 @@ namespace igorw\reasoned;
 // result of a `measurement'.  The quantum-mechanical connotations of
 // `the measurement' must be obvious by now.
 
-(define (== t1 t2)
-  (lambda (s)
-    (cond
-      ((unify t1 t2 s) => succeed)
-      (else (fail s)))))
+function eq($t1, $t2) {
+    return function ($s) use ($t1, $t2) {
+        $res = unify($t1, $t2, $s);
+        if ($res) {
+            return succeed($res);
+        }
+
+        return fail($s);
+    };
+}
 
 
 // We also need a way to 'run' a goal,
 // to see what knowledge we can obtain starting from sheer ignorance
-(define (run g) (g empty-subst))
+function run($g) {
+    global $empty_subst;
+    return $g($empty_subst);
+}
 
 
 // We can build more complex goals using lambda-abstractions and previously
@@ -232,30 +358,36 @@ namespace igorw\reasoned;
 // For example, we can define the function `choice' such that
 // (choice t1 a-list) is a goal that succeeds if t1 is an element of a-list.
 
-(define (choice var lst)
-  (if (null? lst) fail
-    (disj
-      (== var (car lst))
-      (choice var (cdr lst)))))
+function choice($var, $list) {
+    if ([] === $list) {
+        return fail;
+    }
 
-(cout "test choice 1" nl
-  (run (choice 2 '(1 2 3)))
-  nl)
+    return disj(
+        eq($var, first($list)),
+        choice($var, rest($list)));
+}
+
+cout("test choice 1", nl,
+  run(choice(2, [1, 2, 3])),
+  nl);
 // => (()) success
 
-(cout "test choice 2" nl
-  (run (choice 10 '(1 2 3)))
-  nl)
+cout("test choice 2", nl,
+  run(choice(10, [1, 2, 3])),
+  nl);
 // => ()
 // empty list of outcomes: 10 is not a member of '(1 2 3)
 
-(cout "test choice 3" nl
-  (run (choice vx '(1 2 3)))
-  nl)
+cout("test choice 3", nl,
+  run(choice($vx, [1, 2, 3])),
+  nl);
 // => (((#(x) . 1)) ((#(x) . 2)) ((#(x) . 3)))
 // three outcomes
 
 // The name `choice' should evoke The Axiom of Choice...
+
+__halt_compiler();
 
 // Now we can write a very primitive program: find an element that is
 // common in two lists:
