@@ -2,8 +2,6 @@
 
 namespace igorw\reasoned;
 
-require 'reasoned.php';
-
 class TestCase extends \PHPUnit_Framework_TestCase {
     function testConjDisj() {
         // test1
