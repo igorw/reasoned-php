@@ -80,32 +80,6 @@ function conj($f1, $f2) {
 }
 
 
-// Examples
-function cout(/* $args... */) {
-    $args = func_get_args();
-    foreach ($args as $arg) {
-        if (is_string($arg)) {
-            echo $arg;
-        } else {
-            echo json_encode($arg);
-        }
-    }
-}
-
-const nl = "\n";
-
-cout("test1", nl,
-  call(disj(
-     disj(fail, succeed),
-     conj(
-       disj(function ($x) { return succeed($x + 1); },
-         function ($x) { return succeed($x + 10); }),
-       disj(succeed, succeed))),
-    100),
-  nl);
-// => (100 101 101 110 110)
-
-
 // Point 2: (Prolog-like) Logic variables
 //
 // One may think of regular variables as `certain knowledge': they give
@@ -180,7 +154,9 @@ function rest($l) {
     return $l;
 }
 
-$empty_subst = [];
+function empty_subst() {
+    return [];
+}
 
 function ext_s($var, $value, $s) {
     return cons(pair($var->name, $value), $s);
@@ -253,15 +229,11 @@ function lookup($var, $s) {
 
 // return the new substitution, or #f on contradiction.
 
-function is_pair($x) {
-    return $x instanceof Pair;
-}
-
 function unify($t1, $t2, $s) {
     $t1 = lookup($t1, $s);
     $t2 = lookup($t2, $s);
 
-    if (is_object($t1) === is_object($t2) && $t1 === $t2) {
+    if (!is_object($t1) && !is_object($t2) && $t1 === $t2) {
         return $s;
     }
 
@@ -273,9 +245,9 @@ function unify($t1, $t2, $s) {
         return ext_s($t2, $t1, $s);
     }
 
-    if (is_pair($t1) && is_pair($t2)) {
-        $s = unify($t1->first, $t2->first, $s);
-        return $s ? unify($t1->second, $t2->second, $s) : false;
+    if (is_array($t1) && is_array($t2)) {
+        $s = unify(first($t1), first($t2), $s);
+        return $s ? unify(rest($t1), rest($t2), $s) : false;
     }
 
     if ($t1 === $t2) {
@@ -284,37 +256,6 @@ function unify($t1, $t2, $s) {
 
     return false;
 }
-
-
-// define a bunch of logic variables, for convenience
-$vx = lvar('x');
-$vy = lvar('y');
-$vz = lvar('z');
-$vq = lvar('q');
-
-cout("test-u1", nl,
-  unify($vx, $vy, $empty_subst),
-  nl);
-// => ((#(x) . #(y)))
-
-cout("test-u2", nl,
-  unify($vx, 1, unify($vx, $vy, $empty_subst)),
-  nl);
-// => ((#(y) . 1) (#(x) . #(y)))
-
-cout("test-u3", nl,
-  lookup($vy, unify($vx, 1, unify($vx, $vy, $empty_subst))),
-  nl);
-// => 1
-// when two variables are associated with each other,
-// improving our knowledge about one of them improves the knowledge of the
-// other
-
-cout("test-u4", nl,
-  unify(pair($vx, $vy), pair($vy, 1), $empty_subst),
-  nl);
-// => ((#(y) . 1) (#(x) . #(y)))
-// exactly the same substitution as in test-u2
 
 
 // Part 3: Logic system
@@ -348,8 +289,7 @@ function eq($t1, $t2) {
 // We also need a way to 'run' a goal,
 // to see what knowledge we can obtain starting from sheer ignorance
 function run($g) {
-    global $empty_subst;
-    return $g($empty_subst);
+    return $g(empty_subst());
 }
 
 
@@ -367,23 +307,6 @@ function choice($var, $list) {
         eq($var, first($list)),
         choice($var, rest($list)));
 }
-
-cout("test choice 1", nl,
-  run(choice(2, [1, 2, 3])),
-  nl);
-// => (()) success
-
-cout("test choice 2", nl,
-  run(choice(10, [1, 2, 3])),
-  nl);
-// => ()
-// empty list of outcomes: 10 is not a member of '(1 2 3)
-
-cout("test choice 3", nl,
-  run(choice($vx, [1, 2, 3])),
-  nl);
-// => (((#(x) . 1)) ((#(x) . 2)) ((#(x) . 3)))
-// three outcomes
 
 // The name `choice' should evoke The Axiom of Choice...
 
