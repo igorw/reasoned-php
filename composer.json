@@ -1,4 +1,14 @@
 {
+    "name": "igorw/reasoned",
+    "description": "A miniKanren in PHP.",
+    "keywords": ["logic"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Igor Wiedler",
+            "email": "igor@wiedler.ch"
+        }
+    ],
     "autoload": {
         "files": ["reasoned.php"]
     }
