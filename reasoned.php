@@ -44,10 +44,6 @@ const succeed = 'igorw\reasoned\succeed';
 // We build more complex non-deterministic functions by combining
 // the existing ones with the help of the following two combinators.
 
-function append($l1, $l2) {
-    return array_merge($l1, $l2);
-}
-
 function apply($fn, $args) {
     return call_user_func_array($fn, $args);
 }
@@ -57,6 +53,11 @@ function call(/* $fn, $args... */) {
     $fn = array_shift($args);
     return call_user_func_array($fn, $args);
 }
+
+function append(/** $args */) {
+    return apply('array_merge', func_get_args());
+}
+
 
 // (disj f1 f2) returns all the results of f1 and all the results of f2.
 // (disj f1 f2) returns no results only if neither f1 nor f2 returned
@@ -310,32 +311,18 @@ function choice($var, $list) {
 
 // The name `choice' should evoke The Axiom of Choice...
 
-__halt_compiler();
-
 // Now we can write a very primitive program: find an element that is
 // common in two lists:
 
-(define (common-el l1 l2)
-  (conj
-    (choice vx l1)
-    (choice vx l2)))
+function common_el($l1, $l2) {
+    $vx = lvar('x');
 
-(cout "common-el-1" nl
-  (run (common-el '(1 2 3) '(3 4 5)))
-  nl)
-// => (((#(x) . 3)))
+    return conj(
+        choice($vx, $l1),
+        choice($vx, $l2));
+}
 
-(cout "common-el-2" nl
-  (run (common-el '(1 2 3) '(3 4 1 7)))
-  nl)
-// => (((#(x) . 1)) ((#(x) . 3)))
-// two elements are in common
-
-(cout "common-el-3" nl
-  (run (common-el '(11 2 3) '(13 4 1 7)))
-  nl)
-// => ()
-// nothing in common
+__halt_compiler();
 
 
 // Let us do something a bit more complex

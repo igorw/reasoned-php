@@ -69,4 +69,21 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, run(choice($vx, [1, 2, 3])));
         // three outcomes
     }
+
+    function testCommonEl() {
+        // common-el-1
+        $expected = [[pair('x', 3)]];
+        $this->assertEquals($expected, run(common_el([1, 2, 3], [3, 4, 5])));
+
+        // common-el-2
+        $expected = [
+            [pair('x', 1)],
+            [pair('x', 3)],
+        ];
+        $this->assertEquals($expected, run(common_el([1, 2, 3], [3, 4, 1, 7])));
+
+        // common-el-3
+        $expected = [];
+        $this->assertEquals($expected, run(common_el([11, 2, 3], [13, 4, 1, 7])));
+    }
 }
