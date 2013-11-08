@@ -14,7 +14,8 @@ This is a relational logic programming engine.
 
     use igorw\reasoned as r;
 
-    $results = r\run(r\choice(r\lvar('x'), [1, 2, 3]));
+    $results = r\run(
+        r\choice(r\lvar('x'), [1, 2, 3]));
     // [[pair('x', 1)],
     //  [pair('x', 2)],
     //  [pair('x', 3)]]
@@ -23,7 +24,8 @@ This is a relational logic programming engine.
 
     use igorw\reasoned as r;
 
-    $results = r\run(r\common_el([1, 2, 3], [3, 4, 5]));
+    $results = r\run(
+        r\common_el([1, 2, 3], [3, 4, 5]));
     // [[pair('x', 3)]]
 
 ## See also
