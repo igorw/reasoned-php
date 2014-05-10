@@ -145,18 +145,18 @@ function conj(callable $goal1, callable $goal2) {
     };
 }
 
-function cons($value, array $stream) {
-    array_unshift($stream, $value);
-    return $stream;
+function cons($value, array $list) {
+    array_unshift($list, $value);
+    return $list;
 }
 
-function first(array $stream) {
-    return array_shift($stream);
+function first(array $list) {
+    return array_shift($list);
 }
 
-function rest(array $stream) {
-    array_shift($stream);
-    return $stream;
+function rest(array $list) {
+    array_shift($list);
+    return $list;
 }
 
 interface Stream extends \IteratorAggregate {
