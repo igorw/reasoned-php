@@ -76,7 +76,7 @@ function eq($u, $v) {
 }
 
 function unit(State $state) {
-    return [$state, mzero()];
+    return cons($state, mzero());
 }
 
 function mzero() {
@@ -300,8 +300,6 @@ function run($n, $goal) {
 }
 
 function run_star($goal) {
-    var_dump(take_all(call_goal(fresh($goal))));exit;
-    var_dump(reify(array_filter(take_all(call_goal(fresh($goal))))));exit;
     return reify(take_all(call_goal(fresh($goal))));
 }
 
