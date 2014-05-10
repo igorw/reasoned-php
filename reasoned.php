@@ -91,11 +91,11 @@ function eq($u, $v) {
 }
 
 function unit(State $state) {
-    return cons($state, mzero());
+    return new PairStream($state, mzero());
 }
 
 function mzero() {
-    return [];
+    return new EmptyStream();
 }
 
 // really just means non-empty array
@@ -135,13 +135,13 @@ function call_fresh(callable $f) {
 
 function disj(callable $goal1, callable $goal2) {
     return function (State $state) use ($goal1, $goal2) {
-        return mplus($goal1($state), $goal2($state));
+        return $goal1($state)->mplus($goal2($state));
     };
 }
 
 function conj(callable $goal1, callable $goal2) {
     return function (State $state) use ($goal1, $goal2) {
-        return bind($goal1($state), $goal2);
+        return $goal1($state)->bind($goal2);
     };
 }
 
@@ -159,37 +159,74 @@ function rest(array $stream) {
     return $stream;
 }
 
-function mplus($stream1, $stream2) {
-    if ($stream1 === []) {
-        return $stream2;
-    }
-    if (is_callable($stream1)) {
-        return function () use ($stream1, $stream2) {
-            return mplus($stream2, $stream1());
-        };
-    }
-    return cons(first($stream1), mplus(rest($stream1), $stream2));
+interface Stream extends \IteratorAggregate {
+    function mplus(Stream $stream2);
+    function bind(callable $goal);
 }
 
-function bind($stream, callable $goal) {
-    if ($stream === []) {
+class EmptyStream implements Stream {
+    function mplus(Stream $stream2) {
+        return $stream2;
+    }
+    function bind(callable $goal) {
         return mzero();
     }
-    if (is_callable($stream)) {
-        return function () use ($stream, $goal) {
-            return bind($stream(), $goal);
-        };
+    function getIterator() {
+        return new \ArrayIterator([]);
     }
-    return mplus($goal(first($stream)), bind(rest($stream), $goal));
+}
+
+class CallableStream implements Stream {
+    public $f;
+    function __construct(callable $f) {
+        $this->f = $f;
+    }
+    function mplus(Stream $stream2) {
+        return new CallableStream(function () use ($stream2) {
+            return $stream2->mplus($this->resolve());
+        });
+    }
+    function bind(callable $goal) {
+        return new CallableStream(function () use ($goal) {
+            return $this->resolve()->bind($goal);
+        });
+    }
+    function getIterator() {
+        return $this->resolve()->getIterator();
+    }
+    function resolve() {
+        return call_user_func($this->f);
+    }
+}
+
+class PairStream implements Stream {
+    public $first;
+    public $rest;
+    function __construct($first, Stream $rest) {
+        $this->first = $first;
+        $this->rest = $rest;
+    }
+    function mplus(Stream $stream2) {
+        return new PairStream($this->first, $this->rest->mplus($stream2));
+    }
+    function bind(callable $goal) {
+        return $goal($this->first)->mplus($this->rest->bind($goal));
+    }
+    function getIterator() {
+        yield $this->first;
+        foreach ($this->rest->getIterator() as $x) {
+            yield $x;
+        }
+    }
 }
 
 // recovering miniKanren's control operators
 
 function zzz(callable $goal) {
     return function (State $state) use ($goal) {
-        return function () use ($goal, $state) {
+        return new CallableStream(function () use ($goal, $state) {
             return $goal($state);
-        };
+        });
     };
 }
 
@@ -239,36 +276,33 @@ function collect_args(callable $f, $argCount, $args) {
 
 // from streams to lists
 
-function pull($stream) {
-    if (is_callable($stream)) {
-        return pull($stream());
-    }
-    return $stream;
-}
-
-function take_all($stream) {
-    $stream = pull($stream);
-    if ($stream === []) {
-        return [];
-    }
-    return cons(first($stream), take_all(rest($stream)));
-}
-
 function take($n, $stream) {
-    if ($n === 0) {
-        return [];
+    foreach ($stream as $x) {
+        if ($n-- === 0) {
+            break;
+        }
+        yield $x;
     }
-    $stream = pull($stream);
-    if ($stream === []) {
-        return [];
+}
+
+function map(callable $f, $stream) {
+    foreach ($stream as $x) {
+        yield $f($x);
     }
-    return cons(first($stream), take($n - 1, rest($stream)));
+}
+
+function to_array($stream) {
+    $array = [];
+    foreach ($stream as $x) {
+        $array[] = $x;
+    }
+    return $array;
 }
 
 // recovering reification
 
-function reify(array $states) {
-    return array_map(function (State $state) { return $state->reify(); }, $states);
+function reify($states) {
+    return map(function (State $state) { return $state->reify(); }, $states);
 }
 
 function reify_name($n) {
@@ -293,11 +327,11 @@ function call_goal($goal) {
 }
 
 function run($n, $goal) {
-    return reify(take($n, call_goal(fresh($goal))));
+    return to_array(take($n, reify(call_goal(fresh($goal)))));
 }
 
 function run_star($goal) {
-    return reify(take_all(call_goal(fresh($goal))));
+    return to_array(reify(call_goal(fresh($goal))));
 }
 
 var_dump(run_star(function ($x) {
@@ -334,8 +368,6 @@ var_dump(run_star(function ($q, $a, $b) {
         eq($q, [$a, $b]),
     ]);
 }));
-
-// failing cases below
 
 var_dump(run_star(function ($q) {
     return disj_plus([
