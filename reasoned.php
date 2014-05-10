@@ -23,35 +23,31 @@ function is_variable($x) {
 }
 
 class Substitution {
-    public $values;
-    function __construct(array $values = []) {
-        $this->values = $values;
+    public $map;
+    function __construct(array $map = []) {
+        $this->map = $map;
     }
-    function walk($u) {
-        if (is_variable($u) && $value = $this->find($u)) {
-            return $this->walk($value);
+    // originally named walk()
+    function lookup($u) {
+        while (is_variable($u) && $v = $this->find($u)) {
+            $u = $v;
         }
         return $u;
     }
     function find(Variable $var) {
-        foreach ($this->values as list($x, $value)) {
-            if ($var->is_equal($x)) {
-                return $value;
-            }
-        }
-        return null;
+        return isset($this->map[$var->name]) ? $this->map[$var->name] : null;
     }
     function extend(Variable $x, $value) {
         return new Substitution(array_merge(
-            [[$x, $value]],
-            $this->values
+            [$x->name => $value],
+            $this->map
         ));
     }
     function length() {
-        return count($this->values);
+        return count($this->map);
     }
     function reify($v) {
-        $v = $this->walk($v);
+        $v = $this->lookup($v);
         if (is_variable($v)) {
             $n = reify_name($this->length());
             return $this->extend($v, $n);
@@ -104,8 +100,8 @@ function is_pair($value) {
 }
 
 function unify($u, $v, Substitution $subst) {
-    $u = $subst->walk($u);
-    $v = $subst->walk($v);
+    $u = $subst->lookup($u);
+    $v = $subst->lookup($v);
 
     if (is_variable($u) && is_variable($v) && $u->is_equal($v)) {
         return $subst;
@@ -310,7 +306,7 @@ function reify_name($n) {
 }
 
 function walk_star($v, Substitution $subst) {
-    $v = $subst->walk($v);
+    $v = $subst->lookup($v);
     if (is_variable($v)) {
         return $v;
     }
