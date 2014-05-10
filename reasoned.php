@@ -98,7 +98,6 @@ function mzero() {
     return new EmptyStream();
 }
 
-// really just means non-empty array
 function is_unifiable_array($value) {
     return is_array($value) && count($value) > 0;
 }
@@ -244,7 +243,7 @@ class PairStream implements Stream {
     }
     function getIterator() {
         yield $this->first;
-        foreach ($this->rest->getIterator() as $x) {
+        foreach ($this->rest as $x) {
             yield $x;
         }
     }
