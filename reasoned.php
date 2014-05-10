@@ -28,7 +28,7 @@ class Substitution {
         $this->values = $values;
     }
     function walk($u) {
-        if (is_variable($u) && $value = $this->find($u)) {
+        if (is_variable($u) && null !== $value = $this->find($u)) {
             return $this->walk($value);
         }
         return $u;

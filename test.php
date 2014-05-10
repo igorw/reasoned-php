@@ -54,3 +54,7 @@ var_dump(run_star(function ($q) {
         [eq($q, 'c')],
     ]);
 }));
+
+var_dump(run_star(function ($q) {
+    return eq($q, []);
+}));
