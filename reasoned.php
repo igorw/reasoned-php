@@ -385,3 +385,5 @@ var_dump(run_star(function ($q) {
         [eq($q, 'c')],
     ]);
 }));
+
+// @todo Pair abstraction (that unifies with arrays)
