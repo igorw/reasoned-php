@@ -362,15 +362,15 @@ function walk_star($v, Substitution $subst) {
 
 // recovering the scheme interface
 
-function call_goal($goal) {
+function call_goal(callable $goal) {
     return $goal(new State());
 }
 
-function run($n, $goal) {
+function run($n, callable $goal) {
     return to_array(take($n, reify(call_goal(fresh($goal)))));
 }
 
-function run_star($goal) {
+function run_star(callable $goal) {
     return to_array(reify(call_goal(fresh($goal))));
 }
 
