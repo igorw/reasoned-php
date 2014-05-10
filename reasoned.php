@@ -334,3 +334,13 @@ var_dump(run_star(function ($q, $a, $b) {
         eq($q, [$a, $b]),
     ]);
 }));
+
+// failing cases below
+
+var_dump(run_star(function ($q) {
+    return conde([
+        [eq($q, 'a')],
+        [eq($q, 'b')],
+        [eq($q, 'c')],
+    ]);
+}));
