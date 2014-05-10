@@ -284,6 +284,7 @@ function conde(array $lines) {
     return disj_plus(array_map('igorw\reasoned\conj_plus', $lines));
 }
 
+// based heavily on mudge/php-microkanren
 function fresh(callable $f) {
     $argCount = (new \ReflectionFunction($f))->getNumberOfParameters();
     if ($argCount === 0) {
