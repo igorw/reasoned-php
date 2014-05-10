@@ -172,7 +172,7 @@ class EmptyStream implements Stream {
         return mzero();
     }
     function getIterator() {
-        return new \ArrayIterator([]);
+        return new \EmptyIterator();
     }
 }
 
