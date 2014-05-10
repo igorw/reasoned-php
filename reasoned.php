@@ -275,6 +275,7 @@ function collect_args(callable $f, $argCount, $args) {
 }
 
 // from streams to lists
+// @todo use iter?
 
 function take($n, $stream) {
     foreach ($stream as $x) {
