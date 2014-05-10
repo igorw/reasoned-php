@@ -1,12 +1,6 @@
 # reasoned-php
 
-A [miniKanren](http://minikanren.org/) in PHP.
-
-As all other non-scheme implementations of miniKanren, based on
-[sokuza-kanren](http://okmij.org/ftp/Scheme/sokuza-kanren.scm)
-by Oleg Kiselyov.
-
-This is a relational logic programming engine.
+A [miniKanren](http://minikanren.org/) in PHP, based on the microKanren paper.
 
 ## Examples
 
@@ -32,3 +26,4 @@ This is a relational logic programming engine.
 
 * [The Reasoned Schemer](http://mitpress.mit.edu/books/reasoned-schemer)
 * [miniKanren](http://minikanren.org/)
+* [microKanren](...)
