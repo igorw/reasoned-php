@@ -56,7 +56,7 @@ class Substitution {
             $n = reify_name($this->length());
             return $this->extend($v, $n);
         }
-        if (is_pair($v)) {
+        if (is_unifiable_array($v)) {
             return $this->reify(first($v))
                         ->reify(rest($v));
         }
@@ -99,8 +99,25 @@ function mzero() {
 }
 
 // really just means non-empty array
-function is_pair($value) {
+function is_unifiable_array($value) {
     return is_array($value) && count($value) > 0;
+}
+
+class Pair {
+    public $first;
+    public $rest;
+    function __construct($first, $rest) {
+        $this->first = $first;
+        $this->rest = $rest;
+    }
+}
+
+function pair($first, $rest) {
+    return new Pair($first, $rest);
+}
+
+function is_pair($x) {
+    return $x instanceof Pair;
 }
 
 function unify($u, $v, Substitution $subst) {
@@ -116,10 +133,23 @@ function unify($u, $v, Substitution $subst) {
     if (is_variable($v)) {
         return $subst->extend($v, $u);
     }
-    if (is_pair($u) && is_pair($v)) {
+    if (is_unifiable_array($u) && is_unifiable_array($v)) {
         $subst = unify(first($u), first($v), $subst);
         return $subst ? unify(rest($u), rest($v), $subst) : null;
     }
+
+    if (is_pair($u) && is_unifiable_array($v)) {
+        $subst = unify($u->first, first($v), $subst);
+        return $subst ? unify($u->rest, rest($v), $subst) : null;
+    }
+    if (is_unifiable_array($u) && is_pair($v)) {
+        return unify($v, $u, $subst);
+    }
+    if (is_pair($u) && is_pair($v)) {
+        $subst = unify($u->first, $v->first, $subst);
+        return $subst ? unify($u->rest, $v->rest, $subst) : null;
+    }
+
     if ($u === $v) {
         return $subst;
     }
@@ -315,7 +345,7 @@ function walk_star($v, Substitution $subst) {
     if (is_variable($v)) {
         return $v;
     }
-    if (is_pair($v)) {
+    if (is_unifiable_array($v)) {
         return cons(walk_star(first($v), $subst), walk_star(rest($v), $subst));
     }
     return $v;
