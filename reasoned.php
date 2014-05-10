@@ -155,10 +155,11 @@ function unify($u, $v, Substitution $subst) {
     return null;
 }
 
+// $f takes a fresh variable and returns a goal
 function call_fresh(callable $f) {
     return function (State $state) use ($f) {
-        $res = $f(variable($state->count));
-        return $res($state->next());
+        $goal = $f(variable($state->count));
+        return $goal($state->next());
     };
 }
 
