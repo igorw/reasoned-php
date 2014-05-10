@@ -376,3 +376,7 @@ function run_star($goal) {
 function all(array $goals) {
     return conj_plus($goals);
 }
+
+function ≡($u, $v) {
+    return eq($u, $v);
+}

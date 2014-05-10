@@ -139,3 +139,9 @@ var_dump(run_star(function ($q) {
         membero($q, [2, 3, 4]),
     ]);
 }));
+
+// unicode
+
+var_dump(run_star(
+    $❤ ==> disj(≡($❤, 'unicode'), ≡($❤, 'miniKanren'))
+));
