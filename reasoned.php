@@ -335,4 +335,8 @@ function run_star($goal) {
     return to_array(reify(call_goal(fresh($goal))));
 }
 
+function all(array $goals) {
+    return conj_plus($goals);
+}
+
 // @todo Pair abstraction (that unifies with arrays)
