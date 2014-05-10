@@ -338,6 +338,14 @@ var_dump(run_star(function ($q, $a, $b) {
 // failing cases below
 
 var_dump(run_star(function ($q) {
+    return disj_plus([
+        eq($q, 'a'),
+        eq($q, 'b'),
+        eq($q, 'c'),
+    ]);
+}));
+
+var_dump(run_star(function ($q) {
     return conde([
         [eq($q, 'a')],
         [eq($q, 'b')],
