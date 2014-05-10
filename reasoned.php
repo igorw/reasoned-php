@@ -27,7 +27,13 @@ class Substitution {
     function __construct(array $values = []) {
         $this->values = $values;
     }
-    function lookup(Variable $var) {
+    function walk($u) {
+        if (is_variable($u) && $value = $this->find($u)) {
+            return $this->walk($value);
+        }
+        return $u;
+    }
+    function find(Variable $var) {
         foreach ($this->values as list($x, $value)) {
             if ($var->is_equal($x)) {
                 return $value;
@@ -44,13 +50,18 @@ class Substitution {
     function length() {
         return count($this->values);
     }
-}
-
-function walk($u, Substitution $subst) {
-    if (is_variable($u) && $value = $subst->lookup($u)) {
-        return walk($value, $subst);
+    function reify($v) {
+        $v = $this->walk($v);
+        if (is_variable($v)) {
+            $n = reify_name($this->length());
+            return $this->extend($v, $n);
+        }
+        if (is_pair($v)) {
+            return $this->reify(first($v))
+                        ->reify(rest($v));
+        }
+        return $this;
     }
-    return $u;
 }
 
 class State {
@@ -62,6 +73,10 @@ class State {
     }
     function next() {
         return new State($this->subst, $this->count + 1);
+    }
+    function reify() {
+        $v = walk_star(variable(0), $this->subst);
+        return walk_star($v, (new Substitution())->reify($v));
     }
 }
 
@@ -83,9 +98,14 @@ function mzero() {
     return [];
 }
 
+// really just means non-empty array
+function is_pair($value) {
+    return is_array($value) && count($value) > 0;
+}
+
 function unify($u, $v, Substitution $subst) {
-    $u = walk($u, $subst);
-    $v = walk($v, $subst);
+    $u = $subst->walk($u);
+    $v = $subst->walk($v);
 
     if (is_variable($u) && is_variable($v) && $u->is_equal($v)) {
         return $subst;
@@ -96,7 +116,7 @@ function unify($u, $v, Substitution $subst) {
     if (is_variable($v)) {
         return $subst->extend($v, $u);
     }
-    if (is_array($u) && is_array($v)) {
+    if (is_pair($u) && is_pair($v)) {
         $subst = unify(first($u), first($v), $subst);
         return $subst ? unify(rest($u), rest($v), $subst) : null;
     }
@@ -173,34 +193,28 @@ function zzz(callable $goal) {
     };
 }
 
-function conj_plus(/** callable $goals... */) {
-    $goals = func_get_args();
+function conj_plus(array $goals) {
     if (count($goals) === 0) {
         throw new \InvalidArgumentException('Must supply at least one goal');
     }
     if (count($goals) === 1) {
         return zzz(first($goals));
     }
-    return conj(zzz(first($goals)), call_user_func_array('igorw\reasoned\conj_plus', rest($goals)));
+    return conj(zzz(first($goals)), conj_plus(rest($goals)));
 }
 
-function disj_plus(/** callable $goals... */) {
-    $goals = func_get_args();
+function disj_plus(array $goals) {
     if (count($goals) === 0) {
         throw new \InvalidArgumentException('Must supply at least one goal');
     }
     if (count($goals) === 1) {
         return zzz(first($goals));
     }
-    return disj(zzz(first($goals)), call_user_func_array('igorw\reasoned\disj_plus', rest($goals)));
+    return disj(zzz(first($goals)), disj_plus(rest($goals)));
 }
 
-function conde(/** array $lines... */) {
-    $lines = func_get_args();
-    $conjs = array_map(function ($line) {
-        return call_user_func_array('igorw\reasoned\conj_plus', $line);
-    }, $lines);
-    return call_user_func_array('igorw\reasoned\disj_plus', $conjs);
+function conde(array $lines) {
+    return disj_plus(array_map('igorw\reasoned\conj_plus', $lines));
 }
 
 function fresh(callable $f) {
@@ -254,24 +268,7 @@ function take($n, $stream) {
 // recovering reification
 
 function reify(array $states) {
-    return array_map('igorw\reasoned\reify_first', $states);
-}
-
-function reify_first(State $state) {
-    $v = walk_star(variable(0), $state->subst);
-    return walk_star($v, reify_subst($v, new Substitution()));
-}
-
-function reify_subst($v, Substitution $subst) {
-    $v = walk($v, $subst);
-    if (is_variable($v)) {
-        $n = reify_name($subst->length());
-        return $subst->extend($v, $n);
-    }
-    if (is_array($v)) {
-        return reify_subst(rest($v), reify_subst(first($v), $subst));
-    }
-    return $subst;
+    return array_map(function (State $state) { return $state->reify(); }, $states);
 }
 
 function reify_name($n) {
@@ -279,11 +276,11 @@ function reify_name($n) {
 }
 
 function walk_star($v, Substitution $subst) {
-    $v = walk($v, $subst);
+    $v = $subst->walk($v);
     if (is_variable($v)) {
         return $v;
     }
-    if (is_array($v)) {
+    if (is_pair($v)) {
         return cons(walk_star(first($v), $subst), walk_star(rest($v), $subst));
     }
     return $v;
@@ -315,4 +312,25 @@ var_dump(run_star(function ($x) {
         eq($x, 'a'),
         eq($x, 'b')
     );
+}));
+
+var_dump(run_star(function ($x, $y) {
+    return eq($x, $y);
+}));
+
+var_dump(run_star(function ($q, $a, $b) {
+    return conj_plus([
+        eq([$a, $b], ['a', 'b']),
+        eq($q, [$a, $b]),
+    ]);
+}));
+
+var_dump(run_star(function ($q, $a, $b) {
+    return conj_plus([
+        disj_plus([
+            eq([$a, $b], ['a', 'b']),
+            eq([$a, $b], ['b', 'a']),
+        ]),
+        eq($q, [$a, $b]),
+    ]);
 }));
