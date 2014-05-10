@@ -348,6 +348,14 @@ function walk_star($v, Substitution $subst) {
     if (is_unifiable_array($v)) {
         return cons(walk_star(first($v), $subst), walk_star(rest($v), $subst));
     }
+    // @todo move elsewhere (reify logic does not belong in walk*)
+    if (is_pair($v)) {
+        return [
+            $subst->reify($v->first)->walk($v->first),
+            '.',
+            $subst->reify($v->first)->reify($v->rest)->walk($v->rest),
+        ];
+    }
     return $v;
 }
 
