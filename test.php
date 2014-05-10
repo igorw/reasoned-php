@@ -90,14 +90,24 @@ function conso($a, $d, $l) {
     return eq(pair($a, $d), $l);
 }
 
+function firsto($l, $a) {
+    return fresh(function ($d) use ($l, $a) {
+        return conso($a, $d, $l);
+    });
+}
+
+function resto($l, $d) {
+    return fresh(function ($a) use ($l, $d) {
+        return conso($a, $d, $l);
+    });
+}
+
 function membero($x, $l) {
     return conde([
+        [firsto($l, $x)],
         [fresh(function ($d) use ($x, $l) {
-            return conso($x, $d, $l);
-        })],
-        [fresh(function ($a, $d) use ($x, $l) {
             return all([
-                conso($a, $d, $l),
+                resto($l, $d),
                 membero($x, $d),
             ]);
         })],
@@ -116,9 +126,16 @@ var_dump(run_star(function ($q) {
     ]);
 }));
 
-var_dump(run(1, function ($q) {
+var_dump(run_star(function ($q) {
     return all([
         membero($q, [1, 2, 3]),
         membero($q, [3, 4, 5]),
+    ]);
+}));
+
+var_dump(run_star(function ($q) {
+    return all([
+        membero($q, [1, 2, 3]),
+        membero($q, [2, 3, 4]),
     ]);
 }));
