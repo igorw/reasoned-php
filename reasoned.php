@@ -167,6 +167,14 @@ function call_fresh(callable $f) {
     };
 }
 
+// same as call_fresh, but without fresh var
+function delay(callable $f) {
+    return function (State $state) use ($f) {
+        $goal = $f();
+        return $goal($state->next());
+    };
+}
+
 function disj(callable $goal1, callable $goal2) {
     return function (State $state) use ($goal1, $goal2) {
         return $goal1($state)->mplus($goal2($state));
@@ -292,7 +300,7 @@ function conde(array $lines) {
 function fresh(callable $f) {
     $argCount = (new \ReflectionFunction($f))->getNumberOfParameters();
     if ($argCount === 0) {
-        return $f();
+        return delay($f);
     }
     return call_fresh(function ($x) use ($f, $argCount) {
         return collect_args($f, $argCount, [$x]);
