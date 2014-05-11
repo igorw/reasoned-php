@@ -213,3 +213,17 @@ var_dump(run_star($q ==>
 var_dump(run_star($q ==>
     minuso([0, 1, 1], [0, 0, 0, 1], $q)
 ));
+
+function parse_num(array $n) {
+    return (int) base_convert(implode('', array_reverse($n)), 2, 10);
+}
+
+function parse_nums($nums) {
+    return array_map($n ==> parse_num($n), $nums);
+}
+
+var_dump(parse_nums(run_star($q ==>
+    all([
+        pluso(build_num(15), build_num(10), $q),
+    ])
+)));
