@@ -60,6 +60,10 @@ class Substitution {
             return $this->reify(first($v))
                         ->reify(rest($v));
         }
+        if (is_pair($v)) {
+            return $this->reify($v->first)
+                        ->reify($v->rest);
+        }
         return $this;
     }
 }
@@ -349,12 +353,12 @@ function walk_star($v, Substitution $subst) {
     if (is_unifiable_array($v)) {
         return cons(walk_star(first($v), $subst), walk_star(rest($v), $subst));
     }
-    // @todo move elsewhere (reify logic does not belong in walk*)
+    // @todo return pair and stringify pairs later
     if (is_pair($v)) {
         return [
-            $subst->reify($v->first)->walk($v->first),
+            walk_star($v->first, $subst),
             '.',
-            $subst->reify($v->first)->reify($v->rest)->walk($v->rest),
+            walk_star($v->rest, $subst),
         ];
     }
     return $v;

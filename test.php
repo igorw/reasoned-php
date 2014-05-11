@@ -139,8 +139,6 @@ var_dump(run(3, function ($q) {
     return membero('tofu', $q);
 }));
 
-// expected result (currently failing)
-//
-// => [['tofu', '.', '_.0']
-//     ['_.0', 'tofu', '.', '_.1']
-//     ['_.0', '_.1', 'tofu', '.', '_.2']]
+var_dump(run_star(function ($q) {
+    return appendo([1, 2, 3], [4, 5, 6], $q);
+}));
