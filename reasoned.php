@@ -440,7 +440,7 @@ function appendo($l, $s, $out) {
                 conso($a, $res, $out),
                 appendo($d, $s, $res),
             ]);
-        })],
+         })],
     ]);
 }
 
@@ -460,6 +460,41 @@ function restᵒ($l, $d) {
 
 function appendᵒ($l, $s, $out) {
     return appendo($l, $s, $out);
+}
+
+// debugging goals (inspired by core.logic)
+
+function log($msg) {
+    return function (State $state) use ($msg) {
+        echo "$msg\n";
+        return unit($state);
+    };
+}
+
+function trace_subst() {
+    return function (State $state) {
+        var_dump($state->subst);
+        return unit($state);
+    };
+}
+
+function trace_lvars(array $vars) {
+    return function (State $state) use ($vars) {
+        foreach ($vars as $var) {
+            $v = walk_star($var, $state->subst);
+            $reified = walk_star($v, (new Substitution())->reify($v));
+
+            if (is_variable($var) && is_string($reified)) {
+                echo "variable({$var->name}) = $reified\n";
+            } else if (is_variable($var)) {
+                echo "variable({$var->name}) =\n";
+                var_dump($reified);
+            } else {
+                var_dump($reified);
+            }
+        }
+        return unit($state);
+    };
 }
 
 // @todo occurs check
