@@ -464,4 +464,3 @@ function appendᵒ($l, $s, $out) {
 
 // @todo occurs check
 // @todo the fun never ends: anyo, nevero, alwayso
-// @todo a bit too much: oleg numbers
