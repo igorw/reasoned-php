@@ -86,22 +86,6 @@ var_dump(run_star(function ($q) {
     });
 }));
 
-function conso($a, $d, $l) {
-    return eq(pair($a, $d), $l);
-}
-
-function firsto($l, $a) {
-    return fresh(function ($d) use ($l, $a) {
-        return conso($a, $d, $l);
-    });
-}
-
-function resto($l, $d) {
-    return fresh(function ($a) use ($l, $d) {
-        return conso($a, $d, $l);
-    });
-}
-
 function membero($x, $l) {
     return conde([
         [firsto($l, $x)],
@@ -142,6 +126,21 @@ var_dump(run_star(function ($q) {
 
 // unicode
 
-var_dump(run_star(
-    $❤ ==> disj(≡($❤, 'unicode'), ≡($❤, 'miniKanren'))
+var_dump(run٭(
+    $q ==> condᵉ([
+        [≡($q, 'unicode')],
+        [≡($q, 'madness')],
+    ])
 ));
+
+// pair reification
+
+var_dump(run(3, function ($q) {
+    return membero('tofu', $q);
+}));
+
+// expected result (currently failing)
+//
+// => [['tofu', '.', '_.0']
+//     ['_.0', 'tofu', '.', '_.1']
+//     ['_.0', '_.1', 'tofu', '.', '_.2']]

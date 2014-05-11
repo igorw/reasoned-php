@@ -378,6 +378,58 @@ function all(array $goals) {
     return conj_plus($goals);
 }
 
+// unicode madness
+
 function ≡($u, $v) {
     return eq($u, $v);
 }
+
+function ⋀(array $goals) {
+    return conj_plus($goals);
+}
+
+function ⋁(array $goals) {
+    return disj_plus($goals);
+}
+
+function run٭(callable $goal) {
+    return run_star($goal);
+}
+
+function condᵉ(array $lines) {
+    return conde($lines);
+}
+
+// user level plumbing
+
+function conso($a, $d, $l) {
+    return eq(pair($a, $d), $l);
+}
+
+function firsto($l, $a) {
+    return fresh(function ($d) use ($l, $a) {
+        return conso($a, $d, $l);
+    });
+}
+
+function resto($l, $d) {
+    return fresh(function ($a) use ($l, $d) {
+        return conso($a, $d, $l);
+    });
+}
+
+// user level unicode madness
+
+function consᵒ($a, $d, $l) {
+    return conso($a, $d, $l);
+}
+
+function firstᵒ($l, $a) {
+    return firsto($l, $a);
+}
+
+function restᵒ($l, $d) {
+    return resto($l, $d);
+}
+
+// @todo occurs check

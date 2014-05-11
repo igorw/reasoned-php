@@ -4,23 +4,67 @@ A [miniKanren](http://minikanren.org/) in PHP, based on the microKanren paper.
 
 ## Examples
 
-### basic usage
+### eq
+
+    var_dump(run_star(function ($q) {
+        return eq($q, 'corn');
+    }));
+
+    // => ['corn']
+
+### conde
 
     var_dump(run_star(function ($q) {
         return conde([
-            [eq($q, 'a')],
-            [eq($q, 'b')],
-            [eq($q, 'c')],
+            [eq($q, 'tea')],
+            [eq($q, 'cup')],
         ]);
     }));
 
-    // => ['a', 'b', 'c']
+    // => ['tea', 'cup']
+
+### firsto
+
+    var_dump(run_star(function ($q) {
+        return firsto(['a', 'c', 'o', 'r', 'n'], $q);
+    }));
+
+    // => ['a']
+
+### resto
+
+    var_dump(run_star(function ($q) {
+        return resto(['a', 'c', 'o', 'r', 'n'], $q);
+    }));
+
+    // => [['c', 'o', 'r', 'n']]
+
+### all
+
+    var_dump(run_star(function ($q) {
+        return all([
+            firsto(['a', 'l'], $q),
+            firsto(['a', 'x'], $q),
+            firsto(['a', 'z'], $q),
+        ]);
+    }));
+
+    // => ['a']
+
+### fresh
+
+    var_dump(run_star(function ($q) {
+        return fresh(function ($x) use ($q) {
+            return all([
+                eq(['d', 'a', $x, 'c'], $q),
+                conso($x, ['a', $x, 'c'], $q),
+            ]);
+        });
+    }));
+
+    // => ['d', 'a', 'd', 'c']
 
 ### membero
-
-    function conso($a, $d, $l) {
-        return eq(pair($a, $d), $l);
-    }
 
     function membero($x, $l) {
         return conde([
@@ -44,6 +88,16 @@ A [miniKanren](http://minikanren.org/) in PHP, based on the microKanren paper.
     }));
 
     // => [2, 3]
+
+### run
+
+    var_dump(run(3, function ($q) {
+        return membero('tofu', $q);
+    }));
+
+    // => [['tofu', '.', '_.0']
+    //     ['_.0', 'tofu', '.', '_.1']
+    //     ['_.0', '_.1', 'tofu', '.', '_.2']]
 
 ## See also
 
