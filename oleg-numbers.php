@@ -17,17 +17,6 @@ function bit_xoro($x, $y, $r) {
     ]);
 }
 
-function memberᵒ($x, $l) {
-    return conde([
-        [fresh($d ==> consᵒ($x, $d, $l))],
-        [fresh(($a, $d) ==>
-            all([
-                consᵒ($a, $d, $l),
-                memberᵒ($x, $d),
-            ]))],
-    ]);
-}
-
 var_dump(run_star($s ==>
     fresh(($x, $y) ==>
         all([
