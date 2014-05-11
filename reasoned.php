@@ -418,6 +418,19 @@ function resto($l, $d) {
     });
 }
 
+function appendo($l, $s, $out) {
+    return conde([
+        [eq($l, []), eq($s, $out)],
+        [fresh(function ($a, $d, $res) use ($l, $s, $out) {
+            return all([
+                conso($a, $d, $l),
+                conso($a, $res, $out),
+                appendo($d, $s, $res),
+            ]);
+        })],
+    ]);
+}
+
 // user level unicode madness
 
 function consᵒ($a, $d, $l) {
@@ -432,4 +445,10 @@ function restᵒ($l, $d) {
     return resto($l, $d);
 }
 
+function appendᵒ($l, $s, $out) {
+    return appendo($l, $s, $out);
+}
+
 // @todo occurs check
+// @todo the fun never ends: anyo, nevero, alwayso
+// @todo a bit too much: oleg numbers

@@ -99,6 +99,14 @@ A [miniKanren](http://minikanren.org/) in PHP, based on the microKanren paper.
     //     ['_.0', 'tofu', '.', '_.1']
     //     ['_.0', '_.1', 'tofu', '.', '_.2']]
 
+### appendo
+
+    var_dump(run_star(function ($q) {
+        return appendo([1, 2, 3], [4, 5, 6], $q);
+    }));
+
+    // => [[1, 2, 3, 4, 5, 6]]
+
 ## See also
 
 * [The Reasoned Schemer](http://mitpress.mit.edu/books/reasoned-schemer)
