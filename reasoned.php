@@ -355,11 +355,12 @@ function walk_star($v, Substitution $subst) {
     }
     // @todo return pair and stringify pairs later
     if (is_pair($v)) {
-        return [
-            walk_star($v->first, $subst),
-            '.',
-            walk_star($v->rest, $subst),
-        ];
+        $first = walk_star($v->first, $subst);
+        $rest = walk_star($v->rest, $subst);
+        if (is_array($rest)) {
+            return cons($first, $rest);
+        }
+        return [$first, '.', $rest];
     }
     return $v;
 }
