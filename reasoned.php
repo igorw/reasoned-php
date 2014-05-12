@@ -60,10 +60,6 @@ class Substitution {
             return $this->reify(first($v))
                         ->reify(rest($v));
         }
-        if (is_pair($v)) {
-            return $this->reify($v->first)
-                        ->reify($v->rest);
-        }
         return $this;
     }
 }
@@ -103,7 +99,7 @@ function mzero() {
 }
 
 function is_unifiable_array($value) {
-    return is_array($value) && count($value) > 0;
+    return is_pair($value) || is_array($value) && count($value) > 0;
 }
 
 class Pair {
@@ -140,19 +136,6 @@ function unify($u, $v, Substitution $subst) {
         $subst = unify(first($u), first($v), $subst);
         return $subst ? unify(rest($u), rest($v), $subst) : null;
     }
-
-    if (is_pair($u) && is_unifiable_array($v)) {
-        $subst = unify($u->first, first($v), $subst);
-        return $subst ? unify($u->rest, rest($v), $subst) : null;
-    }
-    if (is_unifiable_array($u) && is_pair($v)) {
-        return unify($v, $u, $subst);
-    }
-    if (is_pair($u) && is_pair($v)) {
-        $subst = unify($u->first, $v->first, $subst);
-        return $subst ? unify($u->rest, $v->rest, $subst) : null;
-    }
-
     if ($u === $v) {
         return $subst;
     }
@@ -192,11 +175,17 @@ function cons($value, array $list) {
     return $list;
 }
 
-function first(array $list) {
+function first($list) {
+    if (is_pair($list)) {
+        return $list->first;
+    }
     return array_shift($list);
 }
 
-function rest(array $list) {
+function rest($list) {
+    if (is_pair($list)) {
+        return $list->rest;
+    }
     array_shift($list);
     return $list;
 }
@@ -358,17 +347,16 @@ function walk_star($v, Substitution $subst) {
     if (is_variable($v)) {
         return $v;
     }
-    if (is_unifiable_array($v)) {
-        return cons(walk_star(first($v), $subst), walk_star(rest($v), $subst));
-    }
-    // @todo return pair and stringify pairs later
     if (is_pair($v)) {
-        $first = walk_star($v->first, $subst);
-        $rest = walk_star($v->rest, $subst);
+        $first = walk_star(first($v), $subst);
+        $rest = walk_star(rest($v), $subst);
         if (is_array($rest)) {
             return cons($first, $rest);
         }
         return [$first, '.', $rest];
+    }
+    if (is_unifiable_array($v)) {
+        return cons(walk_star(first($v), $subst), walk_star(rest($v), $subst));
     }
     return $v;
 }
