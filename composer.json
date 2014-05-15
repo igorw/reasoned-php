@@ -9,6 +9,9 @@
             "email": "igor@wiedler.ch"
         }
     ],
+    "require": {
+        "php": ">=5.5.0"
+    },
     "autoload": {
         "files": ["reasoned.php"]
     }
