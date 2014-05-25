@@ -174,7 +174,7 @@ class State {
         if ([] === $cs) {
             return $v;
         }
-        return [$v, ':', array_merge(['!='], $cs)];
+        return [$v, ':-', array_merge(['!='], $cs)];
     }
 }
 
