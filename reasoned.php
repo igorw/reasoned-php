@@ -89,19 +89,16 @@ class ConstraintStore {
             $this->constraints
         ));
     }
-    function verify(ConstraintStore $cs, Substitution $subst) {
-        if ([] === $this->constraints) {
-            return $cs;
-        }
-        $subst2 = unify_star($this->first(), $subst);
-        if ($subst2) {
-            if ($subst == $subst2) {
-                return null; // false instead of null?
+    function verify(Substitution $subst) {
+        $verified = [];
+        foreach ($this->constraints as $c) {
+            $subst2 = unify_star($c, $subst);
+            if ($subst2 && $subst != $subst2) {
+                $c = $subst2->prefix($subst);
+                $verified[] = $c;
             }
-            $c = $subst2->prefix($subst);
-            return (new ConstraintStore(rest($this->constraints)))->verify($cs->extend($c), $subst);
         }
-        return (new ConstraintStore(rest($this->constraints)))->verify($cs, $subst);
+        return new ConstraintStore($verified);
     }
     // r = reified name substitution
     function purify(Substitution $r) {
@@ -187,7 +184,7 @@ function eq($u, $v) {
         if ($state->subst == $subst) {
             return unit($state);
         }
-        $cs = $state->cs->verify(new ConstraintStore(), $subst);
+        $cs = $state->cs->verify($subst);
         if ($cs) {
             return unit(new State($subst, $state->count, $cs));
         }
