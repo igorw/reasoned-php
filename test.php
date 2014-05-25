@@ -150,3 +150,75 @@ assertSame([['tofu', '.', '_.0'], ['_.0', 'tofu', '.', '_.1'], ['_.0', '_.1', 't
 assertSame([[1, 2, 3, 4, 5, 6]], run_star(function ($q) {
     return appendo([1, 2, 3], [4, 5, 6], $q);
 }));
+
+// disequality
+
+assertSame(['_.0'], run_star(function ($q) {
+    return neq(5, 6);
+}));
+
+assertSame([], run_star(function ($q) {
+    return neq(5, 5);
+}));
+
+assertSame(
+    [
+        [['_.0', '_.1'], ':', ['!=', [['_.0', 5], ['_.1', 6]]]],
+    ],
+    run_star(function ($q) {
+        return fresh(function ($x, $y) use ($q) {
+            return all([
+                neq([5, 6], [$x, $y]),
+                eq($q, [$x, $y]),
+            ]);
+        });
+    })
+);
+
+// rembero
+
+function rembero($x, $l, $out) {
+    return conde([
+        [eq([], $l), eq([], $out)],
+        [fresh(function ($a, $d) use ($x, $l, $out) {
+            return all([
+                eq(pair($a, $d), $l),
+                eq($a, $x),
+                eq($d, $out),
+            ]);
+         })],
+        [fresh(function ($a, $d, $res) use ($x, $l, $out) {
+            return all([
+                eq(pair($a, $d), $l),
+                neq($a, $x),
+                eq(pair($a, $res), $out),
+                rembero($x, $d, $res),
+            ]);
+         })],
+    ]);
+}
+
+assertSame([['a', 'c', 'b', 'd']], run_star(function ($q) {
+    return rembero('b', ['a', 'b', 'c', 'b', 'd'], $q);
+}));
+
+assertSame([], run_star(function ($q) {
+    return rembero('b', ['b'], ['b']);
+}));
+
+assertSame(
+    [
+        ['a', ['b', 'c']],
+        ['b', ['a', 'c']],
+        ['c', ['a', 'b']],
+        [['_.0', ['a', 'b', 'c']], ':', ['!=', [['_.0', 'c']], [['_.0', 'b']], [['_.0', 'a']]]],
+    ],
+    run_star(function ($q) {
+        return fresh(function ($x, $out) use ($q) {
+            return all([
+                rembero($x, ['a', 'b', 'c'], $out),
+                eq([$x, $out], $q),
+            ]);
+        });
+    })
+);

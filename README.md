@@ -1,6 +1,6 @@
 # reasoned-php
 
-A [miniKanren](http://minikanren.org/) in PHP, based on the microKanren paper.
+A [miniKanren](http://minikanren.org/) in PHP.
 
 ## Examples
 
@@ -111,4 +111,5 @@ A [miniKanren](http://minikanren.org/) in PHP, based on the microKanren paper.
 
 * [The Reasoned Schemer](http://mitpress.mit.edu/books/reasoned-schemer)
 * [miniKanren](http://minikanren.org/)
+* [miniKanren (Byrd's Dissertation)](https://scholarworks.iu.edu/dspace/bitstream/handle/2022/8777/Byrd_indiana_0093A_10344.pdf)
 * [microKanren](http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf)

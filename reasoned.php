@@ -62,31 +62,150 @@ class Substitution {
         }
         return $this;
     }
+    function prefix(Substitution $s) {
+        $prefix = [];
+        $values = $this->values;
+        while ($values != $s->values) {
+            $prefix[] = first($values);
+            $values = rest($values);
+        }
+        return new Substitution($prefix);
+    }
+}
+
+// disequality, from byrd's dissertation
+
+class ConstraintStore {
+    public $constraints;
+    function __construct(array $constraints = []) {
+        $this->constraints = $constraints;
+    }
+    function first() {
+        return first($this->constraints);
+    }
+    function extend(Substitution $constraint) {
+        return new ConstraintStore(array_merge(
+            [$constraint],
+            $this->constraints
+        ));
+    }
+    function verify(ConstraintStore $cs, Substitution $subst) {
+        if ([] === $this->constraints) {
+            return $cs;
+        }
+        $subst2 = unify_star($this->first(), $subst);
+        if ($subst2) {
+            if ($subst == $subst2) {
+                return null; // false instead of null?
+            }
+            $c = $subst2->prefix($subst);
+            return (new ConstraintStore(rest($this->constraints)))->verify($cs->extend($c), $subst);
+        }
+        return (new ConstraintStore(rest($this->constraints)))->verify($cs, $subst);
+    }
+    // r = reified name substitution
+    function purify(Substitution $r) {
+        return new ConstraintStore(array_filter($this->constraints, function ($c) use ($r) {
+            return !any_var($c->values, $r);
+        }));
+    }
+    function to_array() {
+        return array_map(function (Substitution $c) {
+            return $c->values;
+        }, $this->constraints);
+    }
+}
+
+function any_var($v, Substitution $r) {
+    if (is_variable($v)) {
+        return is_variable($r->walk($v));
+    }
+    if (is_unifiable_array($v)) {
+        // @todo use foreach?
+        return any_var(first($v), $r) || any_var(rest($v), $r);
+    }
+    return false;
+}
+
+function is_subsumed(Substitution $c, ConstraintStore $cs) {
+    foreach ($cs->constraints as $constraint) {
+        if (unify_star($constraint, $c) == $c) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function remove_subsumed(ConstraintStore $cs, ConstraintStore $cs2) {
+    if ([] === $cs->constraints) {
+        return $cs2;
+    }
+    $cs_rest = new ConstraintStore(rest($cs->constraints));
+    if (is_subsumed($cs->first(), $cs2) || is_subsumed($cs->first(), $cs_rest)) {
+        return remove_subsumed($cs_rest, $cs2);
+    }
+    return remove_subsumed($cs_rest, $cs2->extend($cs->first()));
 }
 
 class State {
     public $subst;
     public $count;
-    function __construct(Substitution $subst = null, $count = 0) {
+    public $cs;
+    function __construct(Substitution $subst = null, $count = 0, ConstraintStore $cs = null) {
         $this->subst = $subst ?: new Substitution();
         $this->count = $count;
+        $this->cs = $cs ?: new ConstraintStore();
     }
     function next() {
-        return new State($this->subst, $this->count + 1);
+        return new State($this->subst, $this->count + 1, $this->cs);
     }
     function reify() {
         $v = walk_star(variable(0), $this->subst);
-        return walk_star($v, (new Substitution())->reify($v));
+        $cs = walk_star($this->cs, $this->subst);
+
+        $r = (new Substitution())->reify($v);
+        $v = walk_star($v, $r);
+
+        $cs = $cs->purify($r);
+        $cs = remove_subsumed($cs, new ConstraintStore());
+        $cs = walk_star($cs, $r);
+
+        $cs = $cs->to_array();
+        if ([] === $cs) {
+            return $v;
+        }
+        return [$v, ':', array_merge(['!='], $cs)];
     }
 }
 
 function eq($u, $v) {
     return function (State $state) use ($u, $v) {
         $subst = unify($u, $v, $state->subst);
-        if ($subst) {
-            return unit(new State($subst, $state->count));
+        if (!$subst) {
+            return mzero();
+        }
+        if ($state->subst == $subst) {
+            return unit($state);
+        }
+        $cs = $state->cs->verify(new ConstraintStore(), $subst);
+        if ($cs) {
+            return unit(new State($subst, $state->count, $cs));
         }
         return mzero();
+    };
+}
+
+function neq($u, $v) {
+    return function (State $state) use ($u, $v) {
+        $subst = unify($u, $v, $state->subst);
+        if (!$subst) {
+            return unit($state);
+        }
+        if ($state->subst == $subst) {
+            return mzero();
+        }
+        $c = $subst->prefix($state->subst);
+        return unit(new State($state->subst, $state->count, $state->cs->extend($c)));
     };
 }
 
@@ -99,6 +218,12 @@ function mzero() {
 }
 
 function is_unifiable_array($value) {
+    if ($value instanceof Substitution) {
+        $value = $value->values;
+    }
+    if ($value instanceof ConstraintStore) {
+        $value = $value->constraints;
+    }
     return is_pair($value) || is_array($value) && count($value) > 0;
 }
 
@@ -142,6 +267,16 @@ function unify($u, $v, Substitution $subst) {
     return null;
 }
 
+function unify_star(Substitution $ps, Substitution $subst) {
+    foreach ($ps->values as list($u, $v)) {
+        $subst = unify($u, $v, $subst);
+        if (!$subst) {
+            return null; // false instead of null?
+        }
+    }
+    return $subst;
+}
+
 // $f takes a fresh variable and returns a goal
 function call_fresh(callable $f) {
     return function (State $state) use ($f) {
@@ -170,12 +305,25 @@ function conj(callable $goal1, callable $goal2) {
     };
 }
 
-function cons($value, array $list) {
+// @todo: do not rely on cons/first/rest for subst/cs during reification?
+function cons($value, $list) {
+    if ($list instanceof Substitution) {
+        return new Substitution(cons($value, $list->values));
+    }
+    if ($list instanceof ConstraintStore) {
+        return new ConstraintStore(cons($value, $list->constraints));
+    }
     array_unshift($list, $value);
     return $list;
 }
 
 function first($list) {
+    if ($list instanceof Substitution) {
+        return first($list->values);
+    }
+    if ($list instanceof ConstraintStore) {
+        return first($list->constraints);
+    }
     if (is_pair($list)) {
         return $list->first;
     }
@@ -183,6 +331,12 @@ function first($list) {
 }
 
 function rest($list) {
+    if ($list instanceof Substitution) {
+        return new Substitution(rest($list->values));
+    }
+    if ($list instanceof ConstraintStore) {
+        return new ConstraintStore(rest($list->constraints));
+    }
     if (is_pair($list)) {
         return $list->rest;
     }
@@ -486,4 +640,5 @@ function trace_lvars(array $vars) {
 }
 
 // @todo occurs check
+// @todo unifying with null
 // @todo the fun never ends: anyo, nevero, alwayso
