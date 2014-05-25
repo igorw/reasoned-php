@@ -4,32 +4,40 @@ namespace igorw\reasoned;
 
 require 'vendor/autoload.php';
 
-var_dump(run_star(function ($x) {
+class AssertionFailedException extends \UnexpectedValueException {}
+
+function assertSame($expected, $value) {
+    if ($expected !== $value) {
+        throw new AssertionFailedException(sprintf("%s is not %s", json_encode($value), json_encode($expected)));
+    }
+}
+
+assertSame([], run_star(function ($x) {
     return conj(
         eq($x, 'a'),
         eq($x, 'b')
     );
 }));
 
-var_dump(run_star(function ($x) {
+assertSame(['a', 'b'], run_star(function ($x) {
     return disj(
         eq($x, 'a'),
         eq($x, 'b')
     );
 }));
 
-var_dump(run_star(function ($x, $y) {
+assertSame(['_.0'], run_star(function ($x, $y) {
     return eq($x, $y);
 }));
 
-var_dump(run_star(function ($q, $a, $b) {
+assertSame([['a', 'b']], run_star(function ($q, $a, $b) {
     return conj_plus([
         eq([$a, $b], ['a', 'b']),
         eq($q, [$a, $b]),
     ]);
 }));
 
-var_dump(run_star(function ($q, $a, $b) {
+assertSame([['a', 'b'], ['b', 'a']], run_star(function ($q, $a, $b) {
     return conj_plus([
         disj_plus([
             eq([$a, $b], ['a', 'b']),
@@ -39,7 +47,7 @@ var_dump(run_star(function ($q, $a, $b) {
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame(['a', 'b', 'c'], run_star(function ($q) {
     return disj_plus([
         eq($q, 'a'),
         eq($q, 'b'),
@@ -47,7 +55,7 @@ var_dump(run_star(function ($q) {
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame(['a', 'b', 'c'], run_star(function ($q) {
     return conde([
         [eq($q, 'a')],
         [eq($q, 'b')],
@@ -55,11 +63,11 @@ var_dump(run_star(function ($q) {
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([[]], run_star(function ($q) {
     return eq($q, []);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([[], ['_.0', '.', '_.1']], run_star(function ($q) {
     return conde([
         [eq($q, [])],
         [fresh(function ($a, $d) use ($q) {
@@ -68,7 +76,7 @@ var_dump(run_star(function ($q) {
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([[1, [2, 3]]], run_star(function ($q) {
     return fresh(function ($a, $d) use ($q) {
         return all([
             eq([1, 2, 3], pair($a, $d)),
@@ -77,7 +85,7 @@ var_dump(run_star(function ($q) {
     });
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([[1, [2, 3]]], run_star(function ($q) {
     return fresh(function ($a, $d) use ($q) {
         return all([
             eq([$a, 2, 3], pair(1, $d)),
@@ -98,26 +106,26 @@ function membero($x, $l) {
     ]);
 }
 
-var_dump(run_star(function ($q) {
+assertSame([], run_star(function ($q) {
     return all([
         membero(7, [1, 2, 3]),
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([1, 2, 3], run_star(function ($q) {
     return all([
         membero($q, [1, 2, 3]),
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([3], run_star(function ($q) {
     return all([
         membero($q, [1, 2, 3]),
         membero($q, [3, 4, 5]),
     ]);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([2, 3], run_star(function ($q) {
     return all([
         membero($q, [1, 2, 3]),
         membero($q, [2, 3, 4]),
@@ -126,7 +134,7 @@ var_dump(run_star(function ($q) {
 
 // unicode
 
-var_dump(run٭(
+assertSame(['unicode', 'madness'], run٭(
     $q ==> condᵉ([
         [≡($q, 'unicode')],
         [≡($q, 'madness')],
@@ -135,10 +143,10 @@ var_dump(run٭(
 
 // pair reification
 
-var_dump(run(3, function ($q) {
+assertSame([['tofu', '.', '_.0'], ['_.0', 'tofu', '.', '_.1'], ['_.0', '_.1', 'tofu', '.', '_.2']], run(3, function ($q) {
     return membero('tofu', $q);
 }));
 
-var_dump(run_star(function ($q) {
+assertSame([[1, 2, 3, 4, 5, 6]], run_star(function ($q) {
     return appendo([1, 2, 3], [4, 5, 6], $q);
 }));
