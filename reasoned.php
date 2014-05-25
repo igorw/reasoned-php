@@ -539,6 +539,10 @@ function ≡($u, $v) {
     return eq($u, $v);
 }
 
+function ≢($u, $v) {
+    return neq($u, $v);
+}
+
 function ⋀(array $goals) {
     return conj_plus($goals);
 }

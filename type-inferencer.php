@@ -29,7 +29,7 @@ function lookupᵒ($Γ, $x, $t) {
         condᵉ([
             [≡(pair(pair($x, $t), $rest), $Γ)],
             [≡(pair(pair($y, $type), $rest), $Γ),
-             // ≢($x, $y),
+             ≢($x, $y),
              lookupᵒ($rest, $x, $t)],
         ])
     );
@@ -43,5 +43,3 @@ var_dump(run(4, function ($q) {
         ])
     );
 }));
-
-// todo disequality
