@@ -2,7 +2,7 @@
 
 namespace igorw\reasoned;
 
-// microKanren implementation
+// miniKanren implementation, loosely based on microKanren
 
 class Variable {
     public $name;
