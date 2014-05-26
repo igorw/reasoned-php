@@ -5,6 +5,9 @@ namespace igorw\reasoned;
 require 'vendor/autoload.php';
 
 // type inferencer from the rKanren paper
+//
+// thanks Cameron Swords and Daniel P. Friedman
+// http://webyrd.net/scheme-2013/papers/Swords2013.pdf
 
 function Ͱᵒ($Γ, $e, $t) {
     return fresh(($e1, $e2, $e3, $t1, $t2) ==>
