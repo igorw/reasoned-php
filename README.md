@@ -2,6 +2,42 @@
 
 A [miniKanren](http://minikanren.org/) in PHP.
 
+## Prologue
+
+What the hell is this? It's a tiny logic programming engine!
+
+What is logic programming, you ask? Logic programming is a largely underrated
+paradigm that radically changes the way you write, think about, and run,
+programs.
+
+Imagine your program as a bunch of relations. You can relate things to each
+other. Every time you would use an uni-directional assignment `=`, that
+assignment now becomes a bi-directional relation `==`. It goes both ways. The
+program forms a chain of relations from one or more inputs to one or more
+outputs.
+
+You can introduce logic variables that are unbound values (using `fresh`).
+These variables obey the constraints imposed on them through relations. This
+allows you to provide a fresh logic variable and see what it gets bound to.
+That's what you generally do to get an output from a logic program.
+
+Through the use of conjunction ("and") and disjunction ("or"), you can form
+logical relations. This allows you to encode different possible flows of
+execution. The higher-level method for this is `conde`, which is a disjunction
+of conjunctions.
+
+All of these logical relations form a tree. The execution of a program
+corresponds to a breadth-first search through the tree that unifies the
+provided arguments in accordance to the relations. This means that a program
+can discover more than one solution, or no solution at all.
+
+This radical way of thinking about and writing programs allows for something
+very amazing: **You can run your programs backwards.**
+
+What this means is that you can either give a program inputs and search for a
+corresponding output, but you can also provide outputs and ask for
+corresponding inputs.
+
 ## Examples
 
 ### eq
