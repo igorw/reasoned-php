@@ -70,13 +70,13 @@ A [miniKanren](http://minikanren.org/) in PHP.
         return conde([
             [fresh(function ($d) use ($x, $l) {
                 return conso($x, $d, $l);
-            })],
+             })],
             [fresh(function ($a, $d) use ($x, $l) {
                 return all([
                     conso($a, $d, $l),
                     membero($x, $d),
                 ]);
-            })],
+             })],
         ]);
     }
 
@@ -106,6 +106,46 @@ A [miniKanren](http://minikanren.org/) in PHP.
     }));
 
     // => [[1, 2, 3, 4, 5, 6]]
+
+### neq (disequality)
+
+    var_dump(run_star(function ($q) {
+        return all([
+            membero($q, [1, 2, 3]),
+            neq($q, 2),
+        ]);
+    }));
+
+    // => [1, 3]
+
+### rembero
+
+    function rembero($x, $l, $out) {
+        return conde([
+            [eq([], $l), eq([], $out)],
+            [fresh(function ($a, $d) use ($x, $l, $out) {
+                return all([
+                    eq(pair($a, $d), $l),
+                    eq($a, $x),
+                    eq($d, $out),
+                ]);
+             })],
+            [fresh(function ($a, $d, $res) use ($x, $l, $out) {
+                return all([
+                    eq(pair($a, $d), $l),
+                    neq($a, $x),
+                    eq(pair($a, $res), $out),
+                    rembero($x, $d, $res),
+                ]);
+             })],
+        ]);
+    }
+
+    var_dump(run_star(function ($q) {
+        return rembero('b', ['a', 'b', 'c', 'b', 'd'], $q);
+    }));
+
+    // => [['a', 'c', 'b', 'd']]
 
 ## See also
 

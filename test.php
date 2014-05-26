@@ -161,6 +161,13 @@ assertSame([], run_star(function ($q) {
     return neq(5, 5);
 }));
 
+assertSame([1, 3], run_star(function ($q) {
+    return all([
+        membero($q, [1, 2, 3]),
+        neq($q, 2),
+    ]);
+}));
+
 assertSame(
     [
         [['_.0', '_.1'], ':-', ['!=', [['_.0', 5], ['_.1', 6]]]],
