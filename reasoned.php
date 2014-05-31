@@ -42,6 +42,10 @@ class Substitution {
         return null;
     }
     function extend(Variable $x, $value) {
+        if (occurs_check($x, $value, $this)) {
+            // @todo return unextended subst? throw exception?
+            return null;
+        }
         return new Substitution(array_merge(
             [[$x, $value]],
             $this->values
@@ -71,6 +75,19 @@ class Substitution {
         }
         return new Substitution($prefix);
     }
+}
+
+// the road not taken: occurs-check
+
+function occurs_check($x, $v, Substitution $subst) {
+    $v = $subst->walk($v);
+    if (is_variable($v)) {
+        return $v->is_equal($x);
+    }
+    if (is_unifiable_array($v)) {
+        return occurs_check($x, first($v), $subst) || occurs_check($x, rest($v), $subst);
+    }
+    return false;
 }
 
 // disequality, from byrd's dissertation
@@ -640,6 +657,5 @@ function trace_lvars(array $vars) {
     };
 }
 
-// @todo occurs check
 // @todo unifying with null
 // @todo the fun never ends: anyo, nevero, alwayso

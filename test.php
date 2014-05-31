@@ -229,3 +229,9 @@ assertSame(
         });
     })
 );
+
+// occurs check
+
+assertSame([], run_star(function ($q) {
+    return eq($q, [$q]);
+}));
