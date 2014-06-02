@@ -235,3 +235,27 @@ assertSame(
 assertSame([], run_star(function ($q) {
     return eq($q, [$q]);
 }));
+
+// neq order
+
+assertSame([], run_star(function ($q) {
+    return fresh(function ($a, $b) use ($q) {
+        return all([
+            eq($a, 'mary'),
+            eq($b, 'mary'),
+            neq($a, $b),
+            eq($q, [$a, $b]),
+        ]);
+    });
+}));
+
+assertSame([], run_star(function ($q) {
+    return fresh(function ($a, $b) use ($q) {
+        return all([
+            neq($a, $b),
+            eq($a, 'mary'),
+            eq($b, 'mary'),
+            eq($q, [$a, $b]),
+        ]);
+    });
+}));

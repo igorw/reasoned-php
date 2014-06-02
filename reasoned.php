@@ -110,7 +110,10 @@ class ConstraintStore {
         $verified = [];
         foreach ($this->constraints as $c) {
             $subst2 = unify_star($c, $subst);
-            if ($subst2 && $subst != $subst2) {
+            if ($subst2) {
+                if ($subst == $subst2) {
+                    return null;
+                }
                 $c = $subst2->prefix($subst);
                 $verified[] = $c;
             }
