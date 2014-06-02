@@ -37,4 +37,4 @@ var_dump(run_star($q ==> path('f', 'f')));
 var_dump(run_star($q ==> path('a', 'c')));
 var_dump(run_star($q ==> path('g', 'e')));
 var_dump(run_star($q ==> path('g', $q)));
-// var_dump(run_star($q ==> path($q, 'h')));
+var_dump(run_star($q ==> path($q, 'h')));
