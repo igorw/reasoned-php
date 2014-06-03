@@ -10,12 +10,11 @@ require 'vendor/autoload.php';
 function length($l, $len) {
     return conde([
         [eq($l, []), eq($len, 0)],
-        [fresh(($a, $d, $d_len) ==>
-            all([
-                conso($a, $d, $l),
-                length($d, $d_len),
-                inc($d_len, $len),
-            ]))],
+        [fresh_all(($a, $d, $d_len) ==> [
+            conso($a, $d, $l),
+            length($d, $d_len),
+            inc($d_len, $len),
+         ])],
     ]);
 }
 
@@ -33,12 +32,11 @@ function inc($n, $n1) {
 function accumulate($l, $acc, $out) {
     return conde([
         [eq($l, []), eq($out, $acc)],
-        [fresh(($a, $d, $acc1) ==>
-            all([
-                conso($a, $d, $l),
-                inc($acc, $acc1),
-                accumulate($d, $acc1, $out)
-            ]))],
+        [fresh_all(($a, $d, $acc1) ==> [
+            conso($a, $d, $l),
+            inc($acc, $acc1),
+            accumulate($d, $acc1, $out)
+         ])],
     ]);
 }
 

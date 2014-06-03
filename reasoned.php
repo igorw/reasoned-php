@@ -550,6 +550,27 @@ function all(array $goals) {
     return conj_plus($goals);
 }
 
+// more convenience
+
+// fresh(), combined with all()
+function fresh_all(callable $f) {
+    $argCount = (new \ReflectionFunction($f))->getNumberOfParameters();
+    if ($argCount === 0) {
+        return delay(function () use ($f) {
+            return all($f());
+        });
+    }
+    return call_fresh(function ($x) use ($f, $argCount) {
+        return collect_args(
+            function (/** ... */) use ($f) {
+                return all(call_user_func_array($f, func_get_args()));
+            },
+            $argCount,
+            [$x]
+        );
+    });
+}
+
 // unicode madness
 
 function ≡($u, $v) {
