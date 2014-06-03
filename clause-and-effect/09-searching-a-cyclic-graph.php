@@ -7,6 +7,9 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 9: searching a cyclic graph
 
+// this is more tricky than the acyclic one, because
+// we need to avoid divergence
+
 function a($a, $b) {
     return conde([
         [eq($a, 'g'), eq($b, 'h')],

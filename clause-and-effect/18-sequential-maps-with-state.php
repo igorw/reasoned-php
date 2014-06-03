@@ -7,6 +7,8 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 18: sequential maps with state
 
+// runlength coding, a very basic form of compression
+
 function runcode($l, $c, $n, $x) {
     return conde([
         [eq($l, []), eq($x, [['*', $n, $c]])],

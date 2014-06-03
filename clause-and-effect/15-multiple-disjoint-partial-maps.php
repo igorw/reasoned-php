@@ -7,6 +7,15 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 15: multiple disjoint partial maps
 
+// goal: separate a herd (list of sheep and goats)
+// into two separate lists, one for sheep and  one
+// for goats.
+//
+// variation: skip over invalid elements
+// variation: put invalid elements in a separate list
+// variation: split a list into two lists in an alternating
+//            (interleaving) way
+
 function herd($l, $sheep, $goats) {
     return conde([
         [eq($l, []), eq($sheep, []), eq($goats, [])],
