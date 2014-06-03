@@ -31,13 +31,13 @@ var_dump(run_star($q ==> drink_pair('mary', 'susan', 'gin')));
 var_dump(run_star($q ==> drink_pair('john', 'mary', 'gin')));
 var_dump(run_star($q ==> drink_pair('john', 'john', 'gin')));
 var_dump(run_star($q ==>
-    fresh(($a, $b) ==> all([
+    fresh_all(($a, $b) ==> [
         drink_pair($a, $b, 'gin'),
         eq($q, [$a, $b]),
-    ]))));
+    ])));
 var_dump(run_star($q ==> drink_pair('bertram', 'lucinda', 'vodka')));
 var_dump(run_star($q ==>
-    fresh(($a, $b, $drink) ==> all([
+    fresh_all(($a, $b, $drink) ==> [
         drink_pair($a, $b, $drink),
         eq($q, [$a, $b, $drink]),
-    ]))));
+    ])));

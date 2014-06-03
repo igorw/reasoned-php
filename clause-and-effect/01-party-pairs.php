@@ -36,10 +36,10 @@ var_dump(run_star($q ==> dance_pair('apollo', 'daphne')));
 var_dump(run_star($q ==> dance_pair('camilla', $q)));
 var_dump(run_star($q ==> dance_pair($q, $q)));
 var_dump(run_star($q ==>
-    fresh(($a, $b) ==> all([
+    fresh_all(($a, $b) ==> [
         dance_pair($a, $b),
         eq($q, [$a, $b]),
-    ]))));
+    ])));
 
 // ok, now let's be a bit more inclusive
 // fuck the patriarchy
@@ -65,9 +65,9 @@ function dance_pair_fixed($a, $b) {
 }
 
 var_dump(run_star($q ==>
-    fresh(($a, $b) ==> all([
+    fresh_all(($a, $b) ==> [
         dance_pair_fixed($a, $b),
         eq($q, [$a, $b]),
-    ]))));
+    ])));
 
 // that's better

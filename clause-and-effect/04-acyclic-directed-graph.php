@@ -25,11 +25,10 @@ function a($a, $b) {
 function path($a, $b) {
     return conde([
         [eq($a, $b)],
-        [fresh($i ==>
-            all([
-                a($a, $i),
-                path($i, $b),
-            ]))],
+        [fresh_all($i ==> [
+            a($a, $i),
+            path($i, $b),
+         ])],
     ]);
 }
 

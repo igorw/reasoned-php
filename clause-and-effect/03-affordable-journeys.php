@@ -42,7 +42,7 @@ var_dump(run_star($q ==> affordable('hampshire', 'hampshire')));
 var_dump(run_star($q ==> affordable($q, 'kent')));
 var_dump(run_star($q ==> affordable('sussex', $q)));
 var_dump(run_star($q ==>
-    fresh(($a, $b) ==> all([
+    fresh_all(($a, $b) ==> [
         affordable($a, $b),
         eq($q, [$a, $b]),
-    ]))));
+    ])));
