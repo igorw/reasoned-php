@@ -7,7 +7,7 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 2: drinking pairs
 
-function drinks($person, $drink) {
+function drinkso($person, $drink) {
     return conde([
         [eq($person, 'john'), eq($drink, 'martini')],
         [eq($person, 'mary'), eq($drink, 'gin')],
@@ -17,27 +17,27 @@ function drinks($person, $drink) {
     ]);
 }
 
-function drink_pair($a, $b, $drink) {
+function drink_pairo($a, $b, $drink) {
     return all([
-        drinks($a, $drink),
-        drinks($b, $drink),
+        drinkso($a, $drink),
+        drinkso($b, $drink),
         // disequality constraint prevents drinking with mirror
         neq($a, $b),
     ]);
 }
 
-var_dump(run_star($q ==> drink_pair($q, 'john', 'martini')));
-var_dump(run_star($q ==> drink_pair('mary', 'susan', 'gin')));
-var_dump(run_star($q ==> drink_pair('john', 'mary', 'gin')));
-var_dump(run_star($q ==> drink_pair('john', 'john', 'gin')));
+var_dump(run_star($q ==> drink_pairo($q, 'john', 'martini')));
+var_dump(run_star($q ==> drink_pairo('mary', 'susan', 'gin')));
+var_dump(run_star($q ==> drink_pairo('john', 'mary', 'gin')));
+var_dump(run_star($q ==> drink_pairo('john', 'john', 'gin')));
 var_dump(run_star($q ==>
     fresh_all(($a, $b) ==> [
-        drink_pair($a, $b, 'gin'),
+        drink_pairo($a, $b, 'gin'),
         eq($q, [$a, $b]),
     ])));
-var_dump(run_star($q ==> drink_pair('bertram', 'lucinda', 'vodka')));
+var_dump(run_star($q ==> drink_pairo('bertram', 'lucinda', 'vodka')));
 var_dump(run_star($q ==>
     fresh_all(($a, $b, $drink) ==> [
-        drink_pair($a, $b, $drink),
+        drink_pairo($a, $b, $drink),
         eq($q, [$a, $b, $drink]),
     ])));

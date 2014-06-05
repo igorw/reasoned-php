@@ -7,7 +7,7 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 1: party pairs
 
-function male($person) {
+function maleo($person) {
     return conde([
         [eq($person, 'bertram')],
         [eq($person, 'percival')],
@@ -16,7 +16,7 @@ function male($person) {
     ]);
 }
 
-function female($person) {
+function femaleo($person) {
     return conde([
         [eq($person, 'lucinda')],
         [eq($person, 'camilla')],
@@ -24,27 +24,27 @@ function female($person) {
     ]);
 }
 
-function dance_pair($a, $b) {
+function dance_pairo($a, $b) {
     return all([
-        male($a),
-        female($b),
+        maleo($a),
+        femaleo($b),
     ]);
 }
 
-var_dump(run_star($q ==> dance_pair('percival', $q)));
-var_dump(run_star($q ==> dance_pair('apollo', 'daphne')));
-var_dump(run_star($q ==> dance_pair('camilla', $q)));
-var_dump(run_star($q ==> dance_pair($q, $q)));
+var_dump(run_star($q ==> dance_pairo('percival', $q)));
+var_dump(run_star($q ==> dance_pairo('apollo', 'daphne')));
+var_dump(run_star($q ==> dance_pairo('camilla', $q)));
+var_dump(run_star($q ==> dance_pairo($q, $q)));
 var_dump(run_star($q ==>
     fresh_all(($a, $b) ==> [
-        dance_pair($a, $b),
+        dance_pairo($a, $b),
         eq($q, [$a, $b]),
     ])));
 
 // ok, now let's be a bit more inclusive
 // fuck the patriarchy
 
-function person($person) {
+function persono($person) {
     return conde([
         [eq($person, 'bertram')],
         [eq($person, 'percival')],
@@ -56,17 +56,17 @@ function person($person) {
     ]);
 }
 
-function dance_pair_fixed($a, $b) {
+function dance_pair_fixedo($a, $b) {
     return all([
-        person($a),
-        person($b),
+        persono($a),
+        persono($b),
         neq($a, $b),
     ]);
 }
 
 var_dump(run_star($q ==>
     fresh_all(($a, $b) ==> [
-        dance_pair_fixed($a, $b),
+        dance_pair_fixedo($a, $b),
         eq($q, [$a, $b]),
     ])));
 

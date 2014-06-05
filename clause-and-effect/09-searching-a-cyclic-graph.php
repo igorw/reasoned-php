@@ -10,7 +10,7 @@ require 'vendor/autoload.php';
 // this is more tricky than the acyclic one, because
 // we need to avoid divergence
 
-function a($a, $b) {
+function grapho($a, $b) {
     return conde([
         [eq($a, 'g'), eq($b, 'h')],
         [eq($a, 'd'), eq($b, 'a')],
@@ -26,12 +26,12 @@ function a($a, $b) {
     ]);
 }
 
-function naive_path($a, $b) {
+function naive_patho($a, $b) {
     return conde([
         [eq($a, $b)],
         [fresh_all($i ==> [
-            a($a, $i),
-            path($i, $b),
+            grapho($a, $i),
+            naive_patho($i, $b),
          ])],
     ]);
 }
@@ -41,27 +41,27 @@ function naive_path($a, $b) {
 //     fresh(($a, $b) ==>
 //         naive_path($a, $b))));
 
-function path($a, $b, $t) {
+function patho($a, $b, $t) {
     return conde([
         [eq($a, $a)],
         [fresh_all(($z, $t2) ==> [
-            a($a, $b),
-            legal($z, $t),
+            grapho($a, $b),
+            legalo($z, $t),
             conso($z, $t, $t2),
-            path($z, $b, $t2)])],
+            patho($z, $b, $t2)])],
     ]);
 }
 
-function legal($z, $l) {
+function legalo($z, $l) {
     return conde([
         [eq($l, [])],
         [fresh_all(($a, $d) ==> [
             conso($a, $d, $l),
             neq($z, $a),
-            legal($z, $d)])],
+            legalo($z, $d)])],
     ]);
 }
 
-var_dump(run_star($q ==> path('g', 'c', [])));
-var_dump(run_star($q ==> path('g', 'c', ['f'])));
-var_dump(run_star($q ==> path('a', $q, ['f', 'd'])));
+var_dump(run_star($q ==> patho('g', 'c', [])));
+var_dump(run_star($q ==> patho('g', 'c', ['f'])));
+var_dump(run_star($q ==> patho('a', $q, ['f', 'd'])));

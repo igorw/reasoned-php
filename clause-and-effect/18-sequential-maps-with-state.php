@@ -9,19 +9,19 @@ require 'vendor/autoload.php';
 
 // runlength coding, a very basic form of compression
 
-function runcode($l, $c, $n, $x) {
+function runcodeo($l, $c, $n, $x) {
     return conde([
         [eq($l, []), eq($x, [['*', $n, $c]])],
         [fresh_all(($a, $d, $n1) ==> [
             conso($a, $d, $l),
             eq($c, $a),
             inc($n, $n1),
-            runcode($d, $a, $n1, $x)])],
+            runcodeo($d, $a, $n1, $x)])],
         [fresh_all(($a, $d, $z) ==> [
             conso($a, $d, $l),
             conso(['*', $n, $c], $z, $x),
             neq($a, $c),
-            runcode($d, $a, 1, $z)])],
+            runcodeo($d, $a, 1, $z)])],
     ]);
 }
 
@@ -36,10 +36,10 @@ function inc($n, $n1) {
 
 var_dump(run_star($q ==>
     fresh_all(($c, $x) ==> [
-        runcode([1, 1, 2, 2, 2, 3], $c, 0, $x),
+        runcodeo([1, 1, 2, 2, 2, 3], $c, 0, $x),
         eq($q, [$c, $x])])));
 
 var_dump(run_star($q ==>
     fresh_all(($c, $x) ==> [
-        runcode([12, 2, 2, 'w', 3, 3, 's', 's', 's'], $c, 0, $x),
+        runcodeo([12, 2, 2, 'w', 3, 3, 's', 's', 's'], $c, 0, $x),
         eq($q, [$c, $x])])));

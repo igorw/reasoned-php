@@ -7,7 +7,7 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 3: affordable journeys
 
-function border($a, $b) {
+function bordero($a, $b) {
     return conde([
         [eq($a, 'sussex'), eq($b, 'kent')],
         [eq($a, 'sussex'), eq($b, 'surrey')],
@@ -21,28 +21,28 @@ function border($a, $b) {
     ]);
 }
 
-function adjacent($a, $b) {
+function adjacento($a, $b) {
     return conde([
-        [border($a, $b)],
-        [border($b, $a)],
+        [bordero($a, $b)],
+        [bordero($b, $a)],
     ]);
 }
 
-function affordable($a, $b) {
+function affordableo($a, $b) {
     return fresh($i ==>
         all([
-            adjacent($a, $i),
-            adjacent($i, $b),
+            adjacento($a, $i),
+            adjacento($i, $b),
         ]));
 }
 
-var_dump(run_star($q ==> affordable('wiltshire', 'sussex')));
-var_dump(run_star($q ==> affordable('wiltshire', 'kent')));
-var_dump(run_star($q ==> affordable('hampshire', 'hampshire')));
-var_dump(run_star($q ==> affordable($q, 'kent')));
-var_dump(run_star($q ==> affordable('sussex', $q)));
+var_dump(run_star($q ==> affordableo('wiltshire', 'sussex')));
+var_dump(run_star($q ==> affordableo('wiltshire', 'kent')));
+var_dump(run_star($q ==> affordableo('hampshire', 'hampshire')));
+var_dump(run_star($q ==> affordableo($q, 'kent')));
+var_dump(run_star($q ==> affordableo('sussex', $q)));
 var_dump(run_star($q ==>
     fresh_all(($a, $b) ==> [
-        affordable($a, $b),
+        affordableo($a, $b),
         eq($q, [$a, $b]),
     ])));

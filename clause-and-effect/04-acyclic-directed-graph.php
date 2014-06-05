@@ -7,7 +7,7 @@ require 'vendor/autoload.php';
 // clause and effect
 // worksheet 4: acyclic directed graph
 
-function a($a, $b) {
+function grapho($a, $b) {
     return conde([
         [eq($a, 'g'), eq($b, 'h')],
         [eq($a, 'g'), eq($b, 'd')],
@@ -22,18 +22,18 @@ function a($a, $b) {
     ]);
 }
 
-function path($a, $b) {
+function patho($a, $b) {
     return conde([
         [eq($a, $b)],
         [fresh_all($i ==> [
-            a($a, $i),
-            path($i, $b),
+            grapho($a, $i),
+            patho($i, $b),
          ])],
     ]);
 }
 
-var_dump(run_star($q ==> path('f', 'f')));
-var_dump(run_star($q ==> path('a', 'c')));
-var_dump(run_star($q ==> path('g', 'e')));
-var_dump(run_star($q ==> path('g', $q)));
-var_dump(run_star($q ==> path($q, 'h')));
+var_dump(run_star($q ==> patho('f', 'f')));
+var_dump(run_star($q ==> patho('a', 'c')));
+var_dump(run_star($q ==> patho('g', 'e')));
+var_dump(run_star($q ==> patho('g', $q)));
+var_dump(run_star($q ==> patho($q, 'h')));
