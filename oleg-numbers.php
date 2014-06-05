@@ -146,3 +146,182 @@ function parse_num(array $n) {
 function parse_nums($nums) {
     return array_map($n ==> parse_num($n), $nums);
 }
+
+// just a bit more (the reasoned schemer chapter 8)
+
+function timeso($n, $m, $p) {
+    return conde([
+        [eq([], $n), eq([], $p)],
+        [poso($n), eq([], $m), eq([], $p)],
+        [eq([1], $n), poso($m), eq($m, $p)],
+        [gt1o($n), eq([1], $m), eq($n, $p)],
+        [fresh_all(($x, $z) ==> [
+            eq(pair(0, $x), $n),
+            poso($x),
+            eq(pair(0, $z), $p),
+            poso($m),
+            gt1o($m),
+            timeso($x, $m, $z)])],
+        [fresh_all(($x, $y) ==> [
+            eq(pair(1, $x), $n),
+            poso($x),
+            eq(pair(0, $y), $m),
+            poso($y),
+            timeso($m, $n, $p)])],
+        [fresh_all(($x, $y) ==> [
+            eq(pair(1, $x), $n),
+            poso($x),
+            eq(pair(1, $y), $m),
+            poso($y),
+            odd_timeso($x, $n, $m, $p)])],
+    ]);
+}
+
+function odd_timeso($x, $n, $m, $p) {
+    return fresh_all($q ==> [
+        bound_timeso($q, $p, $n, $m),
+        timeso($x, $m, $q),
+        pluso(pair(0, $q), $m, $p),
+    ]);
+}
+
+function bound_timeso($q, $p, $n, $m) {
+    return conde([
+        [nullo($q), pairo($p)],
+        [fresh_all(($x, $y, $z) ==> [
+            resto($q, $x),
+            resto($p, $y),
+            conde([
+                [nullo($n),
+                 resto($m, $z),
+                 bound_timeso($x, $y, $z, [])],
+                [resto($n, $z),
+                 bound_timeso($x, $y, $z, $m)],
+            ])])],
+    ]);
+}
+
+function nullo($l) {
+    return eq($l, []);
+}
+
+function pairo($l) {
+    return fresh(($a, $d) ==>
+        conso($a, $d, $l));
+}
+
+// =lo
+function eq_lengtho($n, $m) {
+    return conde([
+        [eq([], $n), eq([], $m)],
+        [eq([1], $n), eq([1], $m)],
+        [fresh_all(($a, $x, $b, $y) ==> [
+            eq(pair($a, $x), $n),
+            poso($x),
+            eq(pair($b, $y), $m),
+            poso($y),
+            eq_lengtho($x, $y)])],
+    ]);
+}
+
+// <lo
+function lt_lengtho($n, $m) {
+    return conde([
+        [eq([], $n), poso($m)],
+        [eq([1], $n), gt1o($m)],
+        [fresh_all(($a, $x, $b, $y) ==> [
+            eq(pair($a, $x), $n),
+            poso($x),
+            eq(pair($b, $y), $m),
+            poso($y),
+            lt_lengtho($x, $y)])],
+    ]);
+}
+
+// <=lo
+function lteq_lengtho($n, $m) {
+    return conde([
+        [eq_lengtho($n, $m)],
+        [lt_lengtho($n, $m)],
+    ]);
+}
+
+// <o
+function lto($n, $m) {
+    return conde([
+        [lt_lengtho($n, $m)],
+        [eq_lengtho($n, $m),
+         fresh_all($x ==> [
+            poso($x),
+            pluso($n, $x, $m)])],
+    ]);
+}
+
+// <=o
+function lteqo($n, $m) {
+    return conde([
+        [eq($n, $m)],
+        [lto($n, $m)],
+    ]);
+}
+
+// hold on! it's going to get subtle!
+// ffs, no kidding...
+
+function splito($n, $r, $l, $h) {
+    return conde([
+        [eq([], $n), eq([], $h), eq([], $l)],
+        [fresh_all(($b, $nhat) ==> [
+            eq(pair(0, pair($b, $nhat)), $n),
+            eq([], $r),
+            eq(pair($b, $nhat), $h),
+            eq([], $l)])],
+        [fresh_all($nhat ==> [
+            eq(pair($l, $nhat), $n),
+            eq([], $r),
+            eq($nhat, $h),
+            eq([1], $l)])],
+        [fresh_all(($b, $nhat, $a, $rhat) ==> [
+            eq(pair(0, pair($b, $nhat)), $n),
+            eq(pair($a, $rhat), $r),
+            eq([], $l),
+            splito(pair($b, $nhat), $rhat, [], $h)])],
+        [fresh_all(($nhat, $a, $rhat) ==> [
+            eq(pair(1, $nhat), $n),
+            eq(pair($a, $rhat), $r),
+            eq([1], $l),
+            splito($nhat, $rhat, [], $h)])],
+        [fresh_all(($b, $nhat, $a, $rhat, $lhat) ==> [
+            eq(pair($b, $nhat), $n),
+            eq(pair($a, $rhat), $r),
+            eq(pair($b, $lhat), $l),
+            poso($lhat),
+            splito($nhat, $rhat, $lhat, $h)])],
+    ]);
+}
+
+// /o
+function divideo($n, $m, $q, $r) {
+    return conde([
+        [eq($r, $n), eq([], $q), lto($n, $m)],
+        [eq([1], $q), eq_lengtho($n, $m), pluso($r, $m, $n), lto($r, $m)],
+        [lt_lengtho($m, $n),
+         lto($r, $m),
+         poso($q),
+         fresh_all(($nh, $nl, $qh, $ql, $qlm, $qlmr, $rr, $rh) ==> [
+            splito($n, $r, $nl, $nh),
+            splito($q, $r, $ql, $qh),
+            conde([
+                [eq([], $nh),
+                 eq([], $qh),
+                 minuso($nl, $r, $qlm),
+                 timeso($ql, $m, $qlm)],
+                [poso($nh),
+                 timeso($ql, $m, $qlm),
+                 pluso($qlm, $r, $qlmr),
+                 minuso($qlmr, $nl, $rr),
+                 splito($rr, $r, [], $rh),
+                 divideo($nh, $m, $qh, $rh)],
+            ])])],
+    ]);
+}

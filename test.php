@@ -365,3 +365,65 @@ assertSame([25], parse_nums(run_star($q ==>
         pluso(build_num(15), build_num(10), $q),
     ])
 )));
+
+// just a bit more
+
+assertSame([[1, 0, 0, 1, 1, 1, 0, 1, 1]], run_star($q ==>
+    timeso([1, 1, 1], [1, 1, 1, 1, 1, 1], $q)
+));
+
+assertSame([['_.0', '_.1', ['_.2', 1]]], run_star($q ==>
+    fresh_all(($w, $x, $y) ==> [
+        eq_lengtho(pair(1, pair($w, pair($x, $y))), [0, 1, 1, 0, 1]),
+        eq([$w, $x, $y], $q),
+    ])
+));
+
+assertSame([1], run_star($q ==>
+    eq_lengtho([1], [$q])
+));
+
+assertSame([['_.0', 1]], run_star($q ==>
+    eq_lengtho(pair(1, pair(0, pair(1, $q))), [0, 1, 1, 0, 1])
+));
+
+assertSame([[[], '_.0'], [[1], '_.0']], run(2, $q ==>
+    fresh_all(($y, $z) ==> [
+        lt_lengtho(pair(1, $y), pair(0, pair(1, pair(1, pair(0, pair(1, $z)))))),
+        eq([$y, $z], $q),
+    ])
+));
+
+assertSame([[[], []], [[], ['_.0', '.', '_.1']], [[1], [1]]], run(3, $q ==>
+    fresh_all(($n, $m) ==> [
+        lteq_lengtho($n, $m),
+        eq([$n, $m], $q),
+    ])
+));
+
+assertSame(['_.0'], run_star($q ==>
+    lto([1, 0, 1], [1, 1, 1])
+));
+
+assertSame([], run_star($q ==>
+    lto([1, 1, 1], [1, 0, 1])
+));
+
+assertSame([], run_star($q ==>
+    lto([1, 0, 1], [1, 0, 1])
+));
+
+assertSame([[], [1], ['_.0', 1], [0, 0, 1]], run_star($q ==>
+    lto($q, [1, 0, 1])
+));
+
+// @todo fix stack overflow... wtf!
+// did I mess up the occurs check or something?
+// assertSame([], run_star($q ==>
+//     lto($q, $q)
+// ));
+
+assertSame([], run_star($q ==>
+    fresh($r ==>
+        divideo([1, 0, 1], $q, [1, 1, 1], $r))
+));
