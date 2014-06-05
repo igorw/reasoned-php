@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace igorw\reasoned;
 
@@ -259,3 +259,109 @@ assertSame([], run_star(function ($q) {
         ]);
     });
 }));
+
+// oleg numbers
+
+assertSame([[0, 0], [1, 1]], run_star($s ==>
+    fresh(($x, $y) ==>
+        all([
+            bit_xoro($x, $y, 0),
+            eq([$x, $y], $s),
+        ]))
+));
+
+assertSame([[1, 1]], run_star($s ==>
+    fresh(($x, $y) ==>
+        all([
+            bit_ando($x, $y, 1),
+            eq([$x, $y], $s),
+        ]))
+));
+
+assertSame([0], run_star($r ==>
+    half_addero(1, 1, $r, 1)
+));
+
+assertSame([[0, 1]], run_star(($s) ==>
+    fresh(($r, $c) ==>
+        all([
+            full_addero(0, 1, 1, $r, $c),
+            eq([$r, $c], $s),
+        ]))
+));
+
+assertSame([true], run_star(($q) ==>
+    all([
+        poso([1]),
+        eq(true, $q)
+    ])
+));
+
+assertSame([], run_star(($q) ==>
+    all([
+        poso([]),
+        eq(true, $q)
+    ])
+));
+
+assertSame([['_.0', '.', '_.1']], run_star(($r) ==>
+    poso($r)
+));
+
+// is 6 greater than one?
+assertSame([true], run_star($q ==>
+    all([
+        gt1o([0, 1, 1]),
+        eq(true, $q),
+    ])
+));
+
+// 6 + 3 (+ 1 carry in) = 10
+assertSame([[0, 1, 0, 1]], run_star($s ==>
+    gen_addero(1, [0, 1, 1], [1, 1], $s)
+));
+
+// x + y = 5
+assertSame(
+    [[[1, 0, 1], []],
+     [[], [1, 0, 1]],
+     [[1], [0, 0, 1]]],
+    run(3, $s ==>
+        fresh(($x, $y) ==>
+            all([
+                addero(0, $x, $y, [1, 0, 1]),
+                eq([$x, $y], $s),
+            ])))
+);
+
+// x + y = 5, using pluso
+assertSame(
+    [[[1, 0, 1], []], [[], [1, 0, 1]], [[1], [0, 0, 1]]],
+    run(3, $s ==>
+        fresh(($x, $y) ==>
+            all([
+                pluso($x, $y, [1, 0, 1]),
+                eq([$x, $y], $s),
+            ])))
+);
+
+// 8 - 5 = 3
+assertSame([[1, 1]], run_star($q ==>
+    minuso([0, 0, 0, 1], [1, 0, 1], $q)
+));
+
+// 6 - 6 = 0
+assertSame([[]], run_star($q ==>
+    minuso([0, 1, 1], [0, 1, 1], $q)
+));
+
+// 6 - 8 => does not compute (negative numbers not supported)
+assertSame([], run_star($q ==>
+    minuso([0, 1, 1], [0, 0, 0, 1], $q)
+));
+
+assertSame([25], parse_nums(run_star($q ==>
+    all([
+        pluso(build_num(15), build_num(10), $q),
+    ])
+)));

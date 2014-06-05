@@ -13,6 +13,6 @@
         "php": ">=5.5.0"
     },
     "autoload": {
-        "files": ["reasoned.php"]
+        "files": ["reasoned.php", "oleg-numbers.php"]
     }
 }

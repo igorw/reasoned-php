@@ -45,14 +45,6 @@ function bit_xoro($x, $y, $r) {
     ]);
 }
 
-var_dump(run_star($s ==>
-    fresh(($x, $y) ==>
-        all([
-            bit_xoro($x, $y, 0),
-            eq([$x, $y], $s),
-        ]))
-));
-
 function bit_ando($x, $y, $r) {
     return conde([
         [eq(0, $x), eq(0, $y), eq(0, $r)],
@@ -62,24 +54,12 @@ function bit_ando($x, $y, $r) {
     ]);
 }
 
-var_dump(run_star($s ==>
-    fresh(($x, $y) ==>
-        all([
-            bit_ando($x, $y, 1),
-            eq([$x, $y], $s),
-        ]))
-));
-
 function half_addero($x, $y, $r, $c) {
     return all([
         bit_xoro($x, $y, $r),
         bit_ando($x, $y, $c),
     ]);
 }
-
-var_dump(run_star($r ==>
-    half_addero(1, 1, $r, 1)
-));
 
 function full_addero($b, $x, $y, $r, $c) {
     return fresh(($w, $xy, $wz) ==>
@@ -90,14 +70,6 @@ function full_addero($b, $x, $y, $r, $c) {
         ])
     );
 }
-
-var_dump(run_star(($s) ==>
-    fresh(($r, $c) ==>
-        all([
-            full_addero(0, 1, 1, $r, $c),
-            eq([$r, $c], $s),
-        ]))
-));
 
 function build_num($n) {
     if ($n === 0) {
@@ -117,24 +89,6 @@ function poso($n) {
     );
 }
 
-var_dump(run_star(($q) ==>
-    all([
-        poso([1]),
-        eq(true, $q)
-    ])
-));
-
-var_dump(run_star(($q) ==>
-    all([
-        poso([]),
-        eq(true, $q)
-    ])
-));
-
-var_dump(run_star(($r) ==>
-    poso($r)
-));
-
 // >1o
 function gt1o($n) {
     return fresh(($a, $ad, $dd) ==>
@@ -142,14 +96,6 @@ function gt1o($n) {
         eq(pair($a, pair($ad, $dd)), $n)
     );
 }
-
-// is 6 greater than one?
-var_dump(run_star($q ==>
-    all([
-        gt1o([0, 1, 1]),
-        eq(true, $q),
-    ])
-));
 
 // d = carry in, n = operand1, m = operand2, r = result
 function addero($d, $n, $m, $r) {
@@ -185,51 +131,13 @@ function gen_addero($d, $n, $m, $r) {
         ]));
 }
 
-// 6 + 3 (+ 1 carry in) = 10
-var_dump(run_star($s ==>
-    gen_addero(1, [0, 1, 1], [1, 1], $s)
-));
-
-// x + y = 5
-var_dump(run_star($s ==>
-    fresh(($x, $y) ==>
-        all([
-            addero(0, $x, $y, [1, 0, 1]),
-            eq([$x, $y], $s),
-        ]))
-));
-
 function pluso($n, $m, $k) {
     return addero(0, $n, $m, $k);
 }
 
-// x + y = 5, using pluso
-var_dump(run_star($s ==>
-    fresh(($x, $y) ==>
-        all([
-            pluso($x, $y, [1, 0, 1]),
-            eq([$x, $y], $s),
-        ]))
-));
-
 function minuso($n, $m, $k) {
     return pluso($m, $k, $n);
 }
-
-// 8 - 5 = 3
-var_dump(run_star($q ==>
-    minuso([0, 0, 0, 1], [1, 0, 1], $q)
-));
-
-// 6 - 6 = 0
-var_dump(run_star($q ==>
-    minuso([0, 1, 1], [0, 1, 1], $q)
-));
-
-// 6 - 8 => does not compute (negative numbers not supported)
-var_dump(run_star($q ==>
-    minuso([0, 1, 1], [0, 0, 0, 1], $q)
-));
 
 function parse_num(array $n) {
     return (int) base_convert(implode('', array_reverse($n)), 2, 10);
@@ -238,9 +146,3 @@ function parse_num(array $n) {
 function parse_nums($nums) {
     return array_map($n ==> parse_num($n), $nums);
 }
-
-var_dump(parse_nums(run_star($q ==>
-    all([
-        pluso(build_num(15), build_num(10), $q),
-    ])
-)));
