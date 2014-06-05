@@ -15,31 +15,22 @@ function runcodeo($l, $c, $n, $x) {
         [fresh_all(($a, $d, $n1) ==> [
             conso($a, $d, $l),
             eq($c, $a),
-            inc($n, $n1),
+            pluso($n, build_num(1), $n1),
             runcodeo($d, $a, $n1, $x)])],
         [fresh_all(($a, $d, $z) ==> [
             conso($a, $d, $l),
             conso(['*', $n, $c], $z, $x),
             neq($a, $c),
-            runcodeo($d, $a, 1, $z)])],
+            runcodeo($d, $a, build_num(1), $z)])],
     ]);
-}
-
-// amazing number system
-function inc($n, $n1) {
-    $cases = [];
-    foreach (range(0, 100) as $i) {
-        $cases[] = [eq($n, $i), eq($n1, $i + 1)];
-    }
-    return conde($cases);
 }
 
 var_dump(run_star($q ==>
     fresh_all(($c, $x) ==> [
-        runcodeo([1, 1, 2, 2, 2, 3], $c, 0, $x),
+        runcodeo([1, 1, 2, 2, 2, 3], $c, build_num(0), $x),
         eq($q, [$c, $x])])));
 
 var_dump(run_star($q ==>
     fresh_all(($c, $x) ==> [
-        runcodeo([12, 2, 2, 'w', 3, 3, 's', 's', 's'], $c, 0, $x),
+        runcodeo([12, 2, 2, 'w', 3, 3, 's', 's', 's'], $c, build_num(0), $x),
         eq($q, [$c, $x])])));
