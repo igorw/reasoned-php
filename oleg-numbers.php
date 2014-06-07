@@ -157,7 +157,7 @@ function timeso($n, $m, $p) {
             eq(pair(0, $x), $n),
             poso($x),
             eq(pair(0, $z), $p),
-            poso($m),
+            poso($z),
             gt1o($m),
             timeso($x, $m, $z)])],
         [fresh_all(($x, $y) ==> [
