@@ -425,8 +425,8 @@ assertSame([[], [1], ['_.0', 1], [0, 0, 1]], run_star($q ==>
     lto($q, [1, 0, 1])
 ));
 
-// @todo fix stack overflow... wtf!
-// did I mess up the occurs check or something?
+// TRS-8-52
+// it has no value, since <o calls <lo
 // assertSame([], run_star($q ==>
 //     lto($q, $q)
 // ));
