@@ -277,7 +277,7 @@ function splito($n, $r, $l, $h) {
             eq(pair($b, $nhat), $h),
             eq([], $l)])],
         [fresh_all($nhat ==> [
-            eq(pair($l, $nhat), $n),
+            eq(pair(1, $nhat), $n),
             eq([], $r),
             eq($nhat, $h),
             eq([1], $l)])],
