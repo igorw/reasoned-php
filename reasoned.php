@@ -226,6 +226,18 @@ function neq($u, $v) {
     };
 }
 
+function fail() {
+    return function (State $state) {
+        return mzero();
+    };
+}
+
+function succeed() {
+    return function (State $state) {
+        return unit($state);
+    };
+}
+
 function unit(State $state) {
     return new PairStream($state, mzero());
 }

@@ -13,6 +13,14 @@ function assertSame($expected, $value) {
 }
 
 assertSame([], run_star(function ($x) {
+    return fail();
+}));
+
+assertSame(['_.0'], run_star(function ($x) {
+    return succeed();
+}));
+
+assertSame([], run_star(function ($x) {
     return conj(
         eq($x, 'a'),
         eq($x, 'b')
