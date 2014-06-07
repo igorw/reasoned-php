@@ -106,11 +106,10 @@ function addero($d, $n, $m, $r) {
             [eq(1, $d), eq([], $m), addero(0, $n, [1], $r)],
             [eq(1, $d), eq([], $n), poso($m), addero(0, [1], $m, $r)],
             [eq([1], $n), eq([1], $m),
-             fresh(($a, $c) ==>
-                all([
-                    eq([$a, $c], $r),
-                    full_addero($d, 1, 1, $a, $c)
-                ]))],
+             fresh_all(($a, $c) ==> [
+                eq([$a, $c], $r),
+                full_addero($d, 1, 1, $a, $c)
+             ])],
             [eq([1], $n), gen_addero($d, $n, $m, $r)],
             [eq([1], $m), gt1o($n), gt1o($r), addero($d, [1], $n, $r)],
             [gt1o($n), gen_addero($d, $n, $m, $r)],
@@ -119,16 +118,15 @@ function addero($d, $n, $m, $r) {
 }
 
 function gen_addero($d, $n, $m, $r) {
-    return fresh(($a, $b, $c, $e, $x, $y, $z) ==>
-        all([
-            eq(pair($a, $x), $n),
-            eq(pair($b, $y), $m),
-            poso($y),
-            eq(pair($c, $z), $r),
-            poso($z),
-            full_addero($d, $a, $b, $c, $e),
-            addero($e, $x, $y, $z),
-        ]));
+    return fresh_all(($a, $b, $c, $e, $x, $y, $z) ==> [
+        eq(pair($a, $x), $n),
+        eq(pair($b, $y), $m),
+        poso($y),
+        eq(pair($c, $z), $r),
+        poso($z),
+        full_addero($d, $a, $b, $c, $e),
+        addero($e, $x, $y, $z),
+    ]);
 }
 
 function pluso($n, $m, $k) {
