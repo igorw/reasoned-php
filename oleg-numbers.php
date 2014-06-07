@@ -323,3 +323,99 @@ function divideo($n, $m, $q, $r) {
             ])])],
     ]);
 }
+
+// guess what logo does?
+// it builds a split-rail fence
+
+function logo($n, $b, $q, $r) {
+    return conde([
+        [eq([1], $n), poso($b), eq([], $q), eq([], $r)],
+        [eq([], $q), lto($n, $b), pluso($r, [1], $n)],
+        [eq([1], $q), gt1o($b), eq_lengtho($n, $b), pluso($r, $b, $n)],
+        [eq([1], $b), poso($q), pluso($r, [1], $n)],
+        [eq([], $b), poso($q), eq($r, $n)],
+        [eq([0, 1], $b),
+         fresh_all(($a, $ad, $dd) ==> [
+            poso($dd),
+            eq(pair($a, pair($ad, $dd)), $n),
+            exp2o($n, [], $q),
+            fresh($s ==>
+                splito($n, $dd, $r, $s))])],
+        [fresh_all(($a, $ad, $add, $ddd) ==> [
+            conde([
+                [eq([1, 1], $b)],
+                [eq(pair($a, pair($ad, pair($add, $ddd))), $b)],
+            ])]),
+         lt_lengtho($b, $n),
+         fresh_all(($bw1, $bw, $nw, $nw1, $ql1, $ql, $s) ==> [
+            exp2o($b, [], $bw1),
+            pluso($bw1, [1], $bw),
+            lt_lengtho($q, $n),
+            fresh_all(($q1, $bwq1) ==> [
+                pluso($q, [1], $q1),
+                timeso($bw, $q1, $bwq1),
+                lto($nw1, $bwq1),
+                exp2o($n, [], $nw1),
+                pluso($nw1, [1], $nw),
+                divideo($nw, $bw, $ql1, $s),
+                pluso($ql, [1], $ql1),
+            ]),
+            conde([
+                [eq($q, $ql)],
+                [lt_lengtho($ql, $q)],
+            ]),
+            fresh_all(($bql, $qh, $s, $qdh, $qd) ==> [
+                repeated_mulo($b, $ql, $bql),
+                divideo($nw, $bw1, $qh, $s),
+                pluso($ql, $qdh, $qh),
+                pluso($ql, $qd, $q),
+                conde([
+                    [eq($qd, $qdh)],
+                    [lto($qd, $qdh)],
+                ]),
+                fresh_all(($bqd, $bq1, $bq) ==> [
+                    repeated_mulo($b, $qd, $bqd),
+                    timeso($bql, $bqd, $bq),
+                    timeso($b, $bq, $bq1),
+                    pluso($bq, $r, $n),
+                    lto($n, $bq1)])])])],
+    ]);
+}
+
+function exp2o($n, $b, $q) {
+    return conde([
+        [eq([1], $n), eq([], $q)],
+        [gt1o($n), eq([1], $q),
+         fresh($s ==>
+            splito($n, $b, $s, [1]))],
+        [fresh_all(($q1, $b2) ==> [
+            eq(pair(0, $q1), $q),
+            poso($q1),
+            lt_lengtho($b, $n),
+            appendo($b, pair(1, $b), $b2),
+            exp2o($n, $b2, $q1)])],
+        [fresh_all(($q1, $nh, $b2, $s) ==> [
+            eq(pair(1, $q1), $q),
+            poso($q1),
+            poso($nh),
+            splito($n, $b, $s, $nh),
+            appendo($b, pair(1, $b), $b2),
+            exp2o($nh, $b2, $q1)])],
+    ]);
+}
+
+function repeated_mulo($n, $q, $nq) {
+    return conde([
+        [poso($n), eq([], $q), eq([1], $nq)],
+        [eq([1], $q), eq($n, $nq)],
+        [gt1o($q),
+         fresh_all(($q1, $nq1) ==> [
+            pluso($q1, [1], $q),
+            repeated_mulo($n, $q1, $nq1),
+            timeso($nq1, $n, $nq)])],
+    ]);
+}
+
+function expo($b, $q, $n) {
+    return logo($n, $b, $q, []);
+}

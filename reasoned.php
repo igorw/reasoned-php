@@ -695,3 +695,4 @@ function trace_lvars(array $vars) {
 
 // @todo unifying with null
 // @todo the fun never ends: anyo, nevero, alwayso
+// @todo reduce stack consumption (streams mostly)
