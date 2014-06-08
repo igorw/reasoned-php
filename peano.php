@@ -32,14 +32,14 @@ function peanoo($n) {
     ]);
 }
 
-function pluso($a, $b, $out) {
+function peano_pluso($a, $b, $out) {
     return all([
         conde([
             [eq($a, 'z'), eq($out, $b)],
             [fresh(($c, $d) ==> all([
                 eq($a, ['s', $c]),
                 eq($out, ['s', $d]),
-                pluso($c, $b, $d),
+                peano_pluso($c, $b, $d),
              ]))],
         ]),
         peanoo($a),
@@ -49,18 +49,18 @@ function pluso($a, $b, $out) {
 }
 
 // var_dump(run(10, $q ==> peanoo($q)));
-// var_dump(run(1, $q ==> pluso('z', 'z', $q)));
-// var_dump(run(1, $q ==> pluso(['s', 'z'], ['s', 'z'], $q)));
-// var_dump(run(2, $q ==> pluso(['s', 'z'], ['s', 'z'], $q)));
+// var_dump(run(1, $q ==> peano_pluso('z', 'z', $q)));
+// var_dump(run(1, $q ==> peano_pluso(['s', 'z'], ['s', 'z'], $q)));
+// var_dump(run(2, $q ==> peano_pluso(['s', 'z'], ['s', 'z'], $q)));
 // var_dump(run(10, $q ==>
 //     fresh(($x, $y, $z) ==>
 //         all([
-//             pluso($x, $y, $z),
+//             peano_pluso($x, $y, $z),
 //             eq($q, [$x, $y, $z]),
 //         ]))));
 // var_dump(run(3, $q ==>
 //     fresh(($x, $y) ==>
 //         all([
-//             pluso($x, $y, ['s', ['s', ['s', 'z']]]),
+//             peano_pluso($x, $y, ['s', ['s', ['s', 'z']]]),
 //             eq($q, [$x, $y]),
 //         ]))));
