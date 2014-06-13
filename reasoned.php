@@ -406,7 +406,12 @@ class CallableStream implements Stream {
         });
     }
     function getIterator() {
-        return $this->resolve()->getIterator();
+        $next = $this;
+        do {
+            $next = $next->resolve();
+        } while ($next instanceof CallableStream);
+
+        return $next->getIterator();
     }
     function resolve() {
         return call_user_func($this->f);
