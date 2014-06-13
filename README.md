@@ -187,7 +187,7 @@ corresponding inputs.
 
 * [The Reasoned Schemer](http://mitpress.mit.edu/books/reasoned-schemer)
 * [miniKanren](http://minikanren.org/)
-* [miniKanren (Byrd's Dissertation)](https://scholarworks.iu.edu/dspace/bitstream/handle/2022/8777/Byrd_indiana_0093A_10344.pdf)
+* [miniKanren](https://scholarworks.iu.edu/dspace/bitstream/handle/2022/8777/Byrd_indiana_0093A_10344.pdf) (Byrd's Dissertation)
 * [microKanren](http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf)
 * [rKanren](http://webyrd.net/scheme-2013/papers/Swords2013.pdf)
-* Clause and Effect by William F. Clocksin
+* [Clause and Effect](http://www.amazon.com/Clause-Effect-Programming-Working-Programmer/dp/3540629718) by William F. Clocksin
