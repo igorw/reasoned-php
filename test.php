@@ -440,16 +440,13 @@ assertSame([[0, 1, 1]], run_star($q ==>
     logo([0, 1, 1, 1], [0, 1], [1, 1], $q)
 ));
 
-// increasing from run1 to run2 causes stack overflow
-// after increasing the VM stack size, it works
-//   hhvm -vEval.VMStackElms=65536 test.php
-// but fails with run3.
+// diverges with run3.
 assertSame(
     [
         [[],  ['_.0', '_.1', '.', '_.2'], [0, 0, 1, 0, 0, 0, 1]],
-        // [[1], ['_.0', '_.1', '.', '_.2'], [1, 1, 0, 0, 0, 0, 1]],
+        [[1], ['_.0', '_.1', '.', '_.2'], [1, 1, 0, 0, 0, 0, 1]],
     ],
-    run(1, $s ==>
+    run(2, $s ==>
         fresh_all(($b, $q, $r) ==> [
             logo([0, 0, 1, 0, 0, 0, 1], $b, $q, $r),
             gt1o($q),
