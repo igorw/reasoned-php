@@ -468,13 +468,20 @@ assertSame(
 //     expo([1, 1], [1, 0, 1], $q)
 // ));
 
-// constraint store not reified (or missing)
-// @todo figure out why!
+// this appears to be caused by the combination of two things:
+// * reification transforms ConstraintStore pairs into [5, '.', $d]
+//   before performing constraint verification, this means they
+//   cannot be (dis)unified properly later on.
+// * ConstraintStore::purify() removes non-reified (unground?)
+//   constraints, which leads to the $d being ignored.
+//
+// ... so this might actually be the intended behaviour
 // assertSame([], run(1, $q ==>
 //     fresh($d ==> neq($q, pair(5, $d))),
 // ));
 
-// disequality not propagating
+// when eq() calls ConstraintStore::verify(), it does not match
+// the constraint unification for some reason.
 // @todo figure out why!
 // assertSame([], run(1, $q ==>
 //     all([
