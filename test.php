@@ -467,10 +467,3 @@ assertSame(
 // assertSame([[1, 1, 0, 0, 1, 1, 1, 1]], run(1, $q ==>
 //     expo([1, 1], [1, 0, 1], $q)
 // ));
-
-// disequality on pairs
-// @todo currently failing, please fix!
-// assertSame([], run_star($q ==>
-//     fresh(($a, $d) ==>
-//         neq(pair($a, $d), [2]))
-// ));

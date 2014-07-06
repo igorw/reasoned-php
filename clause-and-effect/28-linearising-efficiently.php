@@ -5,10 +5,18 @@ namespace igorw\reasoned;
 require 'vendor/autoload.php';
 
 // clause and effect
-// worksheet 27: linearising
+// worksheet 28: linearising efficiently
 
 // flattening of lists
+// using a data structure known as difference lists
+// to do O(1) list append because it's just pointers
+
 // @todo broken, need a way to constrain a value to not be a list
+// (see also worksheet 27)
+
+function flatteno($l, $out) {
+    return flat_pairo($l, ['-', $out, []]);
+}
 
 function not_listo($x) {
     return fresh_all(($a, $d) ==> [
@@ -17,16 +25,16 @@ function not_listo($x) {
     ]);
 }
 
-function flatteno($l, $out) {
+function flat_pairo($x, $y) {
     return conde([
-        [eq($l, []), eq($out, [])],
-        [fresh_all(($a, $d, $l1, $l2) ==> [
-            conso($a, $d, $l),
-            flatteno($a, $l1),
-            flatteno($d, $l2),
-            appendo($l1, $l2, $out),
+        [eq($x, []), fresh($l ==> eq($y, ['-', $l, $l]))],
+        [fresh_all(($a, $d, $l1, $l2, $l3) ==> [
+            conso($a, $d, $x),
+            eq($y, ['-', $l1, $l3]),
+            flat_pairo($a, ['-', $l1, $l2]),
+            flat_pairo($d, ['-', $l2, $l3]),
          ])],
-        [not_listo($l), eq($out, [$l]), trace_lvars([$l, $out])],
+        [not_listo($x), fresh($z ==> eq($y, ['-', pair($x, $z), $z]))],
     ]);
 }
 
