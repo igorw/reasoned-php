@@ -455,9 +455,8 @@ assertSame(
     )
 );
 
-// causes stack overflow
+// diverges
 // @todo figure out why!
-// reducing the call stack might actually fix this
 // assertSame([[1, 1, 0, 0, 1, 1, 1, 1]], run(1, $q ==>
 //     expo([1, 1], [1, 0, 1], $q)
 // ));
