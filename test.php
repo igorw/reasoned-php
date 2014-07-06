@@ -440,7 +440,8 @@ assertSame([[0, 1, 1]], run_star($q ==>
     logo([0, 1, 1, 1], [0, 1], [1, 1], $q)
 ));
 
-// diverges with run3.
+// diverges with run3
+// @todo figure out why!
 assertSame(
     [
         [[],  ['_.0', '_.1', '.', '_.2'], [0, 0, 1, 0, 0, 0, 1]],
@@ -454,6 +455,12 @@ assertSame(
         ])
     )
 );
+
+// diverges
+// @todo figure out why!
+// assertSame([[0, 0, 1]], run(1, $q ==>
+//     expo([1, 1], [1, 1], $q)
+// ));
 
 // diverges
 // @todo figure out why!
