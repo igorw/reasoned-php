@@ -467,3 +467,18 @@ assertSame(
 // assertSame([[1, 1, 0, 0, 1, 1, 1, 1]], run(1, $q ==>
 //     expo([1, 1], [1, 0, 1], $q)
 // ));
+
+// constraint store not reified (or missing)
+// @todo figure out why!
+// assertSame([], run(1, $q ==>
+//     fresh($d ==> neq($q, pair(5, $d))),
+// ));
+
+// disequality not propagating
+// @todo figure out why!
+// assertSame([], run(1, $q ==>
+//     all([
+//         fresh($d ==> neq($q, pair(5, $d))),
+//         eq($q, [5, 6, 7]),
+//     ])
+// ));
