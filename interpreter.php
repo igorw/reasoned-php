@@ -95,7 +95,7 @@ var_dump(run(1, function ($q) {
 // eval-expo
 
 var_dump(run(1, function ($q) {
-    return eval_expᵒ(['lambda', ['x'], 'x'], [], $q);
+    return eval_expᵒ(['lambda', ['x'], ['var', 'x']], [], $q);
 }));
 
 var_dump(run(1, function ($q) {
