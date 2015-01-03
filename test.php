@@ -3,6 +3,7 @@
 namespace igorw\reasoned;
 
 require 'vendor/autoload.php';
+require 'oleg-numbers.php';
 
 class AssertionFailedException extends \UnexpectedValueException {}
 

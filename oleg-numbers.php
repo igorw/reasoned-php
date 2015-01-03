@@ -2,8 +2,6 @@
 
 namespace igorw\reasoned;
 
-require 'vendor/autoload.php';
-
 // a bit too much (the reasoned schemer chapter 7)
 //
 // this is a relational number system (relational meaning based on
